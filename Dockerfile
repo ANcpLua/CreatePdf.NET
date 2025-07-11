@@ -22,4 +22,10 @@ await Pdf.Create()\n\
 \n\
 Console.WriteLine("PDF created successfully!");' > Program.cs
 
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+RUN chown -R appuser:appuser /demo
+
+USER appuser
+
 ENTRYPOINT ["dotnet", "run"]

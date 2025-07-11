@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using CreatePdf.NET.Public;
 
 namespace CreatePdf.NET.Internal;
@@ -12,6 +13,7 @@ internal class ConsoleTestLogger : ITestLogger
     public void WriteLine(string message) => Console.WriteLine(message);
 }
 
+[ExcludeFromCodeCoverage]
 internal static class OcrTestExtensions
 {
     public static async Task<string> SaveAndOcr(this Document document, string testName, ITestLogger? output = null)

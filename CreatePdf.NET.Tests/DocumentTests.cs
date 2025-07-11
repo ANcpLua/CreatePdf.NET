@@ -284,6 +284,17 @@ public class DocumentTests
     }
 
     [Fact]
+    public void SaveAndOcrAsync_MethodExists_ReturnsTask()
+    {
+        var doc = Pdf.Create();
+    
+        var method = doc.GetType().GetMethod("SaveAndOcrAsync");
+    
+        method.Should().NotBeNull();
+        method.ReturnType.Should().Be<Task<(string, string)>>();
+    }
+
+    [Fact]
     public void SanitizeText_WithManyNewlines_LimitsTo100Lines()
     {
         var doc = Pdf.Create();

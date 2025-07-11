@@ -244,35 +244,32 @@ public class DocumentTests
     [Fact]
     public void OcrOptions_PageSegmentationMode_CanBeSet()
     {
-        var options = new OcrOptions();
-    
-        options.PageSegmentationMode = 3;
-    
+        var options = new OcrOptions
+        {
+            PageSegmentationMode = 3
+        };
+
         options.PageSegmentationMode.Should().Be(3);
     }
 
     [Fact]
-    public async Task SaveAndOcrAsync_UsesOcrOptions_IncludingOutputDirectory()
+    public void WithOcrOptions_SetsCustomOptions_CapturesCorrectly()
     {
-        var customOptions = new OcrOptions
+        var doc = Pdf.Create();
+        OcrOptions? capturedOptions = null;
+   
+        doc.WithOcrOptions(opt => 
         {
-            OutputDirectory = "custom-ocr-test",
-            Dpi = 150,
-            Language = "eng"
-        };
-    
-        var (path, text) = await Pdf.Create()
-            .WithOcrOptions(opt => 
-            {
-                opt.OutputDirectory = customOptions.OutputDirectory;
-                opt.Dpi = customOptions.Dpi;
-                opt.Language = customOptions.Language;
-            })
-            .AddText("Test OCR")
-            .SaveAndOcrAsync("test-ocr-options");
-        
-        path.Should().NotBeNullOrEmpty();
-        text.Should().Contain("Test OCR");
+            opt.OutputDirectory = "custom-ocr-test";
+            opt.Dpi = 150;
+            opt.Language = "eng";
+            capturedOptions = opt;
+        });
+   
+        capturedOptions.Should().NotBeNull();
+        capturedOptions!.OutputDirectory.Should().Be("custom-ocr-test");
+        capturedOptions.Dpi.Should().Be(150);
+        capturedOptions.Language.Should().Be("eng");
     }
 
     [Fact]

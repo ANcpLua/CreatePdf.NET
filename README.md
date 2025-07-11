@@ -1,6 +1,6 @@
 # CreatePdf.NET
 
-[![codecov](https://codecov.io/gh/ANcpLua/CreatePdf.NET/branch/master/graph/badge.svg)](https://codecov.io/gh/ANcpLua/CreatePdf.NET)
+[![codecov](https://codecov.io/gh/ANcpLua/CreatePdf.NET/branch/main/graph/badge.svg?token=lgxIXBnFrn)](https://codecov.io/gh/ANcpLua/CreatePdf.NET)
 [![.NET](https://img.shields.io/badge/.NET-10.0_Preview-512BD4)](https://dotnet.microsoft.com/download/dotnet/10.0)
 [![NuGet](https://img.shields.io/nuget/v/CreatePdf.NET?label=NuGet&color=blue)](https://www.nuget.org/packages/CreatePdf.NET/)
 [![License](https://img.shields.io/github/license/ANcpLua/CreatePdf.NET?label=License&color=blue)](https://github.com/ANcpLua/CreatePdf.NET/blob/master/LICENSE)

@@ -24,7 +24,7 @@ public class OcrServiceTests
     public async Task AddPixelText_HelloWorld_IsReadableByOcr()
     {
         var ocrResult = await Pdf.Create()
-            .AddPixelText("Hello World")
+            .AddPixelText("Hello World", Dye.Black, Dye.White, PixelTextSize.Medium)
             .SaveAndOcr("AddPixelText_HelloWorld");
 
         ocrResult.Should().NotBeNullOrWhiteSpace()

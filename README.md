@@ -53,7 +53,8 @@ await Pdf.Create(Dye.White)
 | **Windows** | Download [Tesseract](https://github.com/UB-Mannheim/tesseract/wiki) and [Ghostscript](https://www.ghostscript.com/download/gsdnld.html) |
 | **Linux** | `sudo apt-get install ghostscript tesseract-ocr` |
 
-> **Note**: Only needed if using the `SaveAndOcr` extension method. PDF generation works without these.
+> **Note**: Only needed for OCR (SaveAndOcr). PDF generation works without it. 
+>  
 
 ## Requirements
 

@@ -14,6 +14,10 @@ public sealed class Document
    private OcrOptions? _ocrOptions;
    private readonly List<IContent> _contents = [];
 
+   /// <summary>
+   /// Initializes a new instance of the <see cref="Document"/> class with the specified background color.
+   /// </summary>
+   /// <param name="background">The background color for the PDF document.</param>
    public Document(Dye background)
    {
        _background = background;
@@ -112,16 +116,34 @@ public sealed class Document
        return this;
    }
 
+   /// <summary>
+   /// Adds text to the document with the specified size.
+   /// </summary>
+   /// <param name="text">The text to add.</param>
+   /// <param name="size">The size of the text.</param>
+   /// <returns>The document instance for chaining.</returns>
    public Document AddText(string text, TextSize size)
    {
        return AddText(text, null, size);
    }
 
+   /// <summary>
+   /// Adds text to the document with the specified color.
+   /// </summary>
+   /// <param name="text">The text to add.</param>
+   /// <param name="color">The color of the text.</param>
+   /// <returns>The document instance for chaining.</returns>
    public Document AddText(string text, Dye color)
    {
        return AddText(text, color, null);
    }
 
+   /// <summary>
+   /// Adds text to the document with the specified alignment.
+   /// </summary>
+   /// <param name="text">The text to add.</param>
+   /// <param name="alignment">The alignment of the text.</param>
+   /// <returns>The document instance for chaining.</returns>
    public Document AddText(string text, TextAlignment alignment)
    {
        return AddText(text, null, null, alignment);
@@ -159,21 +181,47 @@ public sealed class Document
        return this;
    }
 
+   /// <summary>
+   /// Adds pixel text with specified text color and size.
+   /// </summary>
+   /// <param name="text">The text to render as pixels.</param>
+   /// <param name="textColor">The color of the text.</param>
+   /// <param name="size">The size of the pixel text.</param>
+   /// <returns>The document instance for chaining.</returns>
    public Document AddPixelText(string text, Dye textColor, PixelTextSize size)
    {
        return AddPixelText(text, textColor, null, size);
    }  
 
+   /// <summary>
+   /// Adds pixel text with specified size.
+   /// </summary>
+   /// <param name="text">The text to render as pixels.</param>
+   /// <param name="size">The size of the pixel text.</param>
+   /// <returns>The document instance for chaining.</returns>
    public Document AddPixelText(string text, PixelTextSize size)
    {
        return AddPixelText(text, null, null, size);
    }
 
+   /// <summary>
+   /// Adds pixel text with specified text color.
+   /// </summary>
+   /// <param name="text">The text to render as pixels.</param>
+   /// <param name="textColor">The color of the text.</param>
+   /// <returns>The document instance for chaining.</returns>
    public Document AddPixelText(string text, Dye textColor)
    {
        return AddPixelText(text, textColor, null);
    }
 
+   /// <summary>
+   /// Adds pixel text with specified text and background colors.
+   /// </summary>
+   /// <param name="text">The text to render as pixels.</param>
+   /// <param name="textColor">The color of the text.</param>
+   /// <param name="backgroundColor">The background color.</param>
+   /// <returns>The document instance for chaining.</returns>
    public Document AddPixelText(string text, Dye textColor, Dye backgroundColor)
    {
        return AddPixelText(text, textColor, backgroundColor, null);

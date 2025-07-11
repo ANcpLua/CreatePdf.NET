@@ -1,5 +1,8 @@
 namespace CreatePdf.NET.Public;
 
+/// <summary>
+/// Provides factory methods for creating PDF documents.
+/// </summary>
 public static class Pdf
 {
     /// <summary>

@@ -8,6 +8,10 @@ namespace CreatePdf.NET.Public;
 [ExcludeFromCodeCoverage]
 public readonly struct PixelTextSize
 {
+    /// <summary>
+    /// Gets the scale multiplier for pixel text rendering.
+    /// </summary>
+    /// <value>The scale factor (1-5) that determines the final pixel size.</value>
     public int Value { get; }
 
     private PixelTextSize(int value)

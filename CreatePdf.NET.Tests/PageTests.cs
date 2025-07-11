@@ -21,6 +21,19 @@ public class PageTests
     }
 
     [Fact]
+    public void AddText_AutoContrastWithDarkBackground()
+    {
+        var darkBackground = new Dye(0.1f, 0.1f, 0.1f);
+        var page = new Page(1, darkBackground);
+        var almostBlack = new Dye(0.15f, 0.15f, 0.15f);
+
+        page.AddText("Test", 100, 100, 12, almostBlack);
+        var content = page.GetContent();
+
+        content.Should().Contain("1.000000 1.000000 1.000000 rg");
+    }
+
+    [Fact]
     public void Constructor_SetsBackgroundColor()
     {
         var page = new Page(1, Dye.Red);

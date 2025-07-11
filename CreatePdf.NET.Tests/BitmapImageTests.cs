@@ -39,6 +39,19 @@ public class BitmapImageTests
     }
 
     [Fact]
+    public void FromBitmap_WithSimilarDarkColors_AppliesAutoContrast()
+    {
+        var bitmap = new[] { true };
+        var darkForeground = new Dye(0.1f, 0.1f, 0.1f);
+        var darkBackground = new Dye(0.15f, 0.15f, 0.15f);
+
+        using var image = BitmapImage.FromBitmap(bitmap, 1, 1, darkForeground, darkBackground);
+
+        image.GetPixelMemory().ToArray()
+            .Should().Equal(255, 255, 255);
+    }
+
+    [Fact]
     public void GetPixelMemory_AfterDispose_ThrowsObjectDisposedException()
     {
         var bitmap = new[] { true };

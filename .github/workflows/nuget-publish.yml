@@ -42,17 +42,12 @@ jobs:
         run: dotnet test --configuration Release --no-build --verbosity normal
 
       - name: Pack NuGet package
-        run: dotnet pack CreatePdf.NET/CreatePdf.NET.csproj --configuration Release --no-build --output ./nupkg
+        run: dotnet pack CreatePdf.NET/CreatePdf.NET.csproj --configuration Release --no-build --output ./nupkg -p:GeneratePackageOnBuild=false
 
       - name: Publish packages to NuGet.org
         if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
         run: |
           dotnet nuget push ./nupkg/*.nupkg \
-            --api-key ${{ secrets.NUGET_API_KEY }} \
-            --source https://api.nuget.org/v3/index.json \
-            --skip-duplicate
-          
-          dotnet nuget push ./nupkg/*.snupkg \
             --api-key ${{ secrets.NUGET_API_KEY }} \
             --source https://api.nuget.org/v3/index.json \
             --skip-duplicate

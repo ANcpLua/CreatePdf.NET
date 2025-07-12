@@ -72,10 +72,6 @@ await Pdf.Load(pdfStream).OcrAsync(new OcrOptions
 dotnet add package CreatePdf.NET --prerelease
 ```
 
-## Requirements
-
-- .NET 10.0 (Preview)
-
 ## License
 
 This project is licensed under the [MIT License](LICENSE).

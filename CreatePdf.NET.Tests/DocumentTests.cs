@@ -1,6 +1,5 @@
 using AwesomeAssertions;
 using AwesomeAssertions.Execution;
-using CreatePdf.NET.Public;
 
 namespace CreatePdf.NET.Tests;
 
@@ -200,13 +199,6 @@ public class DocumentTests
         }
     }
 
-    [Fact]
-    public void OcrOptions_OutputDirectory_DefaultsToOcr()
-    {
-        var options = new OcrOptions();
-    
-        options.OutputDirectory.Should().Be("ocr");
-    }
 
     [Fact]
     public void OcrOptions_DefaultValues_AreCorrect()
@@ -216,7 +208,6 @@ public class DocumentTests
         options.Dpi.Should().Be(300);
         options.Language.Should().Be("eng");
         options.PageSegmentationMode.Should().Be(6);
-        options.OutputDirectory.Should().Be("ocr");
     }
 
     [Fact]
@@ -260,28 +251,16 @@ public class DocumentTests
    
         doc.WithOcrOptions(opt => 
         {
-            opt.OutputDirectory = "custom-ocr-test";
             opt.Dpi = 150;
             opt.Language = "eng";
             capturedOptions = opt;
         });
    
         capturedOptions.Should().NotBeNull();
-        capturedOptions!.OutputDirectory.Should().Be("custom-ocr-test");
-        capturedOptions.Dpi.Should().Be(150);
+        capturedOptions!.Dpi.Should().Be(150);
         capturedOptions.Language.Should().Be("eng");
     }
 
-    [Fact]
-    public void OcrOptions_OutputDirectory_CanBeSetAndRetrieved()
-    {
-        var options = new OcrOptions();
-        const string customDir = "custom-ocr-output";
-    
-        options.OutputDirectory = customDir;
-    
-        options.OutputDirectory.Should().Be(customDir);
-    }
 
     [Fact]
     public void SaveAndOcrAsync_MethodExists_ReturnsTask()

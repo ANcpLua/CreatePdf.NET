@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using CreatePdf.NET.Internal;
 
-namespace CreatePdf.NET.Public;
+namespace CreatePdf.NET;
 
 /// <summary>
 /// Represents a PDF document that can be built using a fluent API.
@@ -37,7 +37,6 @@ public sealed class Document
    ///   • 6 = Uniform block of text (good for PDFs)<br/>
    ///   • 7 = Single text line<br/>
    ///   • 8 = Single word<br/>
-   /// - OutputDirectory: Where to save OCR files (default: <see cref="OcrOptions.OutputDirectory"/>)<br/>
    /// <br/>
    /// Advanced options (rarely needed):<br/>
    /// - TesseractPath: Only if Tesseract is not in standard location<br/>
@@ -49,7 +48,6 @@ public sealed class Document
    ///     opt.Dpi = 600;
    ///     opt.Language = "eng";
    ///     opt.PageSegmentationMode = 7;
-   ///     opt.OutputDirectory = "ocr-output";
    /// })
    /// </code>
    /// </example>
@@ -68,7 +66,7 @@ public sealed class Document
    /// <remarks>
    /// Requires Tesseract and Ghostscript/sips to be installed.<br/>
    /// Configure OCR settings using <see cref="WithOcrOptions"/> before calling this method.<br/>
-   /// OCR output files are saved to the configured output directory.
+   /// Temporary OCR files are automatically cleaned up after processing.
    /// </remarks>
    /// <example>
    /// <code>
@@ -83,7 +81,7 @@ public sealed class Document
        var text = await OcrService.ProcessPdfAsync(path, _ocrOptions ?? new OcrOptions());
        return (path, text);
    }
-
+   
    /// <summary>
    /// Adds text to the document with specified formatting.
    /// </summary>
@@ -267,7 +265,7 @@ public sealed class Document
        var path = await SaveAsync(filename);
        FileOperations.Open(path);
    }
-
+   
    /// <summary>
    /// Saves the document and shows its directory in the file explorer.
    /// </summary>
@@ -279,7 +277,6 @@ public sealed class Document
        var path = await SaveAsync(filename);
        FileOperations.ShowDirectory(path);
    }
-
 
    /// <summary>
    /// Saves the document to a PDF file.

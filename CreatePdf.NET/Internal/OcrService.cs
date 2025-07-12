@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using CreatePdf.NET.Public;
 
 namespace CreatePdf.NET.Internal;
 
@@ -30,12 +29,50 @@ internal static class OcrService
 
     public static async Task<string> ProcessPdfAsync(string pdfPath, OcrOptions options)
     {
-        var ocrDir = FileOperations.GetUserFriendlyDirectory("ocr");
+        var tempDir = Path.GetTempPath();
         var pdfName = Path.GetFileNameWithoutExtension(pdfPath);
-        var pngPath = Path.Combine(ocrDir, $"{pdfName}.png");
-        var txtPath = Path.Combine(ocrDir, $"{pdfName}.txt");
+        var pngPath = Path.Combine(tempDir, $"{pdfName}_{Guid.NewGuid():N}.png");
+        var txtPath = Path.Combine(tempDir, $"{pdfName}_{Guid.NewGuid():N}.txt");
 
-        await ConvertPdfToPngAsync(pdfPath, pngPath, options);
-        return await PerformOcrAsync(pngPath, txtPath, options);
+        try
+        {
+            await ConvertPdfToPngAsync(pdfPath, pngPath, options);
+            return await PerformOcrAsync(pngPath, txtPath, options);
+        }
+        finally
+        {
+            TryDeleteFile(pngPath);
+            TryDeleteFile(txtPath);
+        }
+    }
+
+    public static async Task<string> ProcessPdfStreamAsync(Stream pdfStream, OcrOptions options)
+    {
+        var pdfPath = Path.GetTempFileName();
+        var pngPath = Path.ChangeExtension(pdfPath, ".png");
+        var txtPath = Path.ChangeExtension(pdfPath, ".txt");
+
+        try
+        {
+            await using (var fileStream = File.Create(pdfPath))
+            {
+                await pdfStream.CopyToAsync(fileStream);
+            }
+
+            await ConvertPdfToPngAsync(pdfPath, pngPath, options);
+            return await PerformOcrAsync(pngPath, txtPath, options);
+        }
+        finally
+        {
+            TryDeleteFile(pdfPath);
+            TryDeleteFile(pngPath);
+            TryDeleteFile(txtPath);
+        }
+    }
+
+    internal static void TryDeleteFile(string path)
+    {
+        if (File.Exists(path))
+            File.Delete(path);
     }
 }

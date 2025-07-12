@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace CreatePdf.NET.Public;
+namespace CreatePdf.NET;
 
 /// <summary>
 /// Defines scale factors for pixel-based text rendering.

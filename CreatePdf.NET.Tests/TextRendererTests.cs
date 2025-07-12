@@ -1,7 +1,6 @@
 using AwesomeAssertions;
 using AwesomeAssertions.Execution;
 using CreatePdf.NET.Internal;
-using CreatePdf.NET.Public;
 
 namespace CreatePdf.NET.Tests;
 

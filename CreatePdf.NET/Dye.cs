@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace CreatePdf.NET.Public;
+namespace CreatePdf.NET;
 
 /// <summary>
 /// Represents an RGB color for use in PDF documents.

@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using CreatePdf.NET.Public;
 
 namespace CreatePdf.NET.Internal;
 

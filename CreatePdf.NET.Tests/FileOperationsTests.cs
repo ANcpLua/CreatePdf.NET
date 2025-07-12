@@ -1,107 +1,207 @@
 using AwesomeAssertions;
-using AwesomeAssertions.Execution;
 using CreatePdf.NET.Internal;
 
 namespace CreatePdf.NET.Tests;
 
 public class FileOperationsTests
 {
-    [Fact]
-    public void InvalidFileChars_ContainsExpectedCharacters()
-    {
-        var expectedChars = new[] { ':', '|', '<', '>', '"', '*', '?', '\\', '/' };
-
-        expectedChars.Should().OnlyContain(ch => FileOperations.InvalidFileChars.Contains(ch));
-    }
-
     [Theory]
-    [InlineData(null, "document_")]
-    [InlineData("", "document_")]
     [InlineData("test", "test.pdf")]
     [InlineData("test.pdf", "test.pdf")]
     [InlineData("test.PDF", "test.pdf")]
     [InlineData("test.txt", "test.pdf")]
-    [InlineData("file:name", "file_name.pdf")]
-    [InlineData("file|name", "file_name.pdf")]
-    [InlineData("file<>name", "file__name.pdf")]
-    [InlineData("file\\name", "file_name.pdf")]
-    [InlineData("file/name", "file_name.pdf")]
-    public void GetOutputPath_HandlesVariousInputs(string? input, string expectedPrefix)
+    public void GetOutputPath_WithBasicFilenames_ReturnsPdfExtension(string input, string expectedFilename)
     {
         var result = FileOperations.GetOutputPath(input);
 
-        result.Should().EndWith(".pdf");
-        Path.GetFileName(result).Should().StartWith(expectedPrefix);
+        Path.GetFileName(result).Should().Be(expectedFilename);
     }
 
     [Fact]
-    public void GetOutputPath_WithInvalidChars_ReplacesWithUnderscore()
+    public void GetOutputPath_WithNull_GeneratesTimestampedFilename()
     {
-        const string invalidName = "file:with|many<invalid>chars*?.txt";
+        var result = FileOperations.GetOutputPath(null);
 
-        var result = FileOperations.GetOutputPath(invalidName);
-
-        var filename = Path.GetFileName(result);
-        filename.Should().Be("file_with_many_invalid_chars__.pdf");
+        Path.GetFileName(result).Should().StartWith("document_").And.MatchRegex(@"document_\d{13}\.pdf");
     }
 
     [Fact]
-    public void GetOutputPath_GeneratesTimestampedName_WhenNoFilenameProvided()
+    public void GetOutputPath_WithEmptyString_GeneratesTimestampedFilename()
     {
-        var result1 = FileOperations.GetOutputPath(null);
-        var result2 = FileOperations.GetOutputPath("");
+        var result = FileOperations.GetOutputPath("");
 
-        using (new AssertionScope())
-        {
-            Path.GetFileName(result1).Should().StartWith("document_");
-            Path.GetFileName(result1).Should().MatchRegex(@"document_\d{14}\.pdf");
-            Path.GetFileName(result2).Should().StartWith("document_");
-        }
+        Path.GetFileName(result).Should().StartWith("document_").And.MatchRegex(@"document_\d{13}\.pdf");
     }
 
-    [Fact]
-    public void GetUserFriendlyDirectory_CreatesDirectory()
+    [Theory]
+    [InlineData("file:name", "file_name.pdf")]
+    [InlineData("file|name", "file_name.pdf")]
+    [InlineData("file<>name", "file__name.pdf")]
+    [InlineData("file*name", "file_name.pdf")]
+    [InlineData("file?name", "file_name.pdf")]
+    [InlineData("file\"name", "file_name.pdf")]
+    public void GetOutputPath_WithInvalidChars_ReplacesWithUnderscores(string input, string expectedFilename)
     {
-        var testDir = $"test_output_{Guid.NewGuid():N}";
-        
-        var createdDir = FileOperations.GetUserFriendlyDirectory(testDir);
-        
-        Directory.Exists(createdDir).Should().BeTrue();
-        createdDir.Should().EndWith(testDir);
+        var result = FileOperations.GetOutputPath(input);
+
+        Path.GetFileName(result).Should().Be(expectedFilename);
     }
-    
-    [Fact]
-    public void FindProjectRoot_NoProjectFiles_FallsBackToCurrentDirectory()
+
+    [Theory]
+    [InlineData("file/name", "name.pdf")]
+    [InlineData("file\\name", "file_name.pdf")]
+    [InlineData("path/to/file", "file.pdf")]
+    [InlineData(@"path\to\file", "path_to_file.pdf")]
+    public void GetOutputPath_WithPathSeparators_ExtractsFilenameOnly(string input, string expectedFilename)
     {
-        var tempDir = Path.Combine(Path.GetTempPath(), $"no_project_{Guid.NewGuid():N}");
-        var nestedDir = Path.Combine(tempDir, "nested", "deep", "folder");
-        Directory.CreateDirectory(nestedDir);
-        Directory.SetCurrentDirectory(nestedDir);
-        
-        var result = FileOperations.GetUserFriendlyDirectory("test");
-        
-        Directory.Exists(result).Should().BeTrue();
-        result.Should().EndWith("test");
+        var result = FileOperations.GetOutputPath(input);
+
+        Path.GetFileName(result).Should().Be(expectedFilename);
+    }
+
+    [Theory]
+    [InlineData("../../../etc/passwd", "passwd.pdf")]
+    [InlineData("../../../../root/.ssh/id_rsa", "id_rsa.pdf")]
+    [InlineData("../output.pdf", "output.pdf")]
+    [InlineData("/etc/passwd", "passwd.pdf")]
+    [InlineData(@"..\..\file.pdf", "file.pdf")]
+    [InlineData(@"C:\Windows\System32\file.pdf", "C__Windows_System32_file.pdf")]
+    [InlineData(@"\\server\share\file", "server_share_file.pdf")]
+    public void GetOutputPath_WithPathTraversal_ExtractsFilenameOnly(string input, string expectedFilename)
+    {
+        var result = FileOperations.GetOutputPath(input);
+
+        Path.GetFileName(result).Should().Be(expectedFilename);
+    }
+
+    [Theory]
+    [InlineData("file\0name", "file_name.pdf")]
+    [InlineData("file\nname", "file_name.pdf")]
+    [InlineData("file\rname", "file_name.pdf")]
+    [InlineData("file\tname", "file_name.pdf")]
+    public void GetOutputPath_WithControlCharacters_ReplacesWithUnderscores(string input, string expectedFilename)
+    {
+        var result = FileOperations.GetOutputPath(input);
+
+        Path.GetFileName(result).Should().Be(expectedFilename);
+    }
+
+    [Theory]
+    [InlineData("CON", "CON.pdf")]
+    [InlineData("PRN.txt", "PRN.pdf")]
+    [InlineData("AUX.docx", "AUX.pdf")]
+    [InlineData("NUL", "NUL.pdf")]
+    [InlineData("COM1", "COM1.pdf")]
+    [InlineData("LPT1", "LPT1.pdf")]
+    public void GetOutputPath_WithWindowsReservedNames_KeepsName(string input, string expectedFilename)
+    {
+        var result = FileOperations.GetOutputPath(input);
+
+        Path.GetFileName(result).Should().Be(expectedFilename);
+    }
+
+    [Theory]
+    [InlineData("file.pdf.exe", "file.pdf.pdf")]
+    [InlineData("file.txt.pdf", "file.txt.pdf")]
+    public void GetOutputPath_WithMultipleExtensions_ChangesFinalExtension(string input, string expectedFilename)
+    {
+        var result = FileOperations.GetOutputPath(input);
+
+        Path.GetFileName(result).Should().Be(expectedFilename);
+    }
+
+    [Theory]
+    [InlineData("invoice_2025-01-11.txt", "invoice_2025-01-11.pdf")]
+    [InlineData("file (copy).txt", "file (copy).pdf")]
+    [InlineData("user@domain.txt", "user@domain.pdf")]
+    [InlineData("price_$99.99.txt", "price_$99.99.pdf")]
+    public void GetOutputPath_WithAllowedSpecialCharacters_PreservesCharacters(string input, string expectedFilename)
+    {
+        var result = FileOperations.GetOutputPath(input);
+
+        Path.GetFileName(result).Should().Be(expectedFilename);
+    }
+
+    [Theory]
+    [InlineData("file:with|many<invalid>chars*?.txt", "file_with_many_invalid_chars__.pdf")]
+    public void GetOutputPath_WithMultipleInvalidChars_ReplacesAllWithUnderscores(string input, string expectedFilename)
+    {
+        var result = FileOperations.GetOutputPath(input);
+
+        Path.GetFileName(result).Should().Be(expectedFilename);
+    }
+
+    [Theory]
+    [InlineData("  file  ", "file.pdf")]
+    [InlineData("\tfile\t", "file.pdf")]
+    public void GetOutputPath_WithWhitespace_TrimsWhitespace(string input, string expectedFilename)
+    {
+        var result = FileOperations.GetOutputPath(input);
+
+        Path.GetFileName(result).Should().Be(expectedFilename);
+    }
+
+    [Theory]
+    [InlineData(@"/\/\/\")]
+    [InlineData("<<<>>>")]
+    [InlineData("***???")]
+    [InlineData("   ")]
+    [InlineData("\t\t\t")]
+    public void GetOutputPath_WithOnlyInvalidChars_GeneratesTimestampedFilename(string input)
+    {
+        var result = FileOperations.GetOutputPath(input);
+
+        Path.GetFileName(result).Should().StartWith("document_").And.MatchRegex(@"document_\d{13}\.pdf");
+    }
+
+    [Theory]
+    [InlineData("café.txt", "café.pdf")]
+    [InlineData("文档.txt", "文档.pdf")]
+    [InlineData("файл.txt", "файл.pdf")]
+    [InlineData("αρχείο.txt", "αρχείο.pdf")]
+    [InlineData("emoji_😀.txt", "emoji_😀.pdf")]
+    public void GetOutputPath_WithUnicodeCharacters_PreservesCharacters(string input, string expectedFilename)
+    {
+        var result = FileOperations.GetOutputPath(input);
+
+        Path.GetFileName(result).Should().Be(expectedFilename);
+    }
+
+    [Theory]
+    [InlineData("test\r\nfile", "test__file.pdf")]
+    [InlineData("valid\0invalid", "valid_invalid.pdf")]
+    public void GetOutputPath_WithMixedValidAndInvalidChars_ReplacesOnlyInvalidOnes(string input, string expectedFilename)
+    {
+        var result = FileOperations.GetOutputPath(input);
+
+        Path.GetFileName(result).Should().Be(expectedFilename);
     }
 
     [Fact]
-    public void GetOutputPath_CreatesOutputDirectory()
-    {
-        var filename = $"test_{Guid.NewGuid():N}.pdf";
-        
-        var result = FileOperations.GetOutputPath(filename);
-        
-        var directory = Path.GetDirectoryName(result);
-        directory.Should().NotBeNull();
-        Directory.Exists(directory).Should().BeTrue();
-        result.Should().EndWith(filename);
-    }
-
-    [Fact]
-    public void GetOutputPath_ReturnsFullPath()
+    public void GetOutputPath_Always_ReturnsFullyQualifiedPath()
     {
         var result = FileOperations.GetOutputPath("test.pdf");
-        
+
         Path.IsPathFullyQualified(result).Should().BeTrue();
+    }
+
+    [Fact]
+    public void GetOutputPath_Always_CreatesOutputDirectory()
+    {
+        var result = FileOperations.GetOutputPath("test.pdf");
+        var directory = Path.GetDirectoryName(result);
+
+        directory.Should().NotBeNull();
+        Directory.Exists(directory).Should().BeTrue();
+    }
+
+    [Theory]
+    [InlineData("a_very_long_filename_that_exceeds_normal_limits_but_should_still_work_properly_without_truncation.txt",
+        "a_very_long_filename_that_exceeds_normal_limits_but_should_still_work_properly_without_truncation.pdf")]
+    public void GetOutputPath_WithLongFilename_PreservesFullName(string input, string expectedFilename)
+    {
+        var result = FileOperations.GetOutputPath(input);
+
+        Path.GetFileName(result).Should().Be(expectedFilename);
     }
 }

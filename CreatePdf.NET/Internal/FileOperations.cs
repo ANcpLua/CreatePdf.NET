@@ -1,27 +1,48 @@
-using System.Buffers;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.RegularExpressions;
 
 namespace CreatePdf.NET.Internal;
 
-internal static class FileOperations
+internal static partial class FileOperations
 {
-    public static readonly SearchValues<char> InvalidFileChars = SearchValues.Create([
-        ..Path.GetInvalidFileNameChars(),
-        ':', '|', '<', '>', '"', '*', '?', '\\', '/'
-    ]);
+    [GeneratedRegex(@"[""<>|:*?\x00-\x1F/\\]")]
+    private static partial Regex InvalidCharsRegex();
+    
+    private static readonly TimeProvider TimeProvider = TimeProvider.System;
+
+    public static string GetOutputPath(string? userInput)
+    {
+        var outputDir = Path.Combine(AppContext.BaseDirectory, "output");
+        Directory.CreateDirectory(outputDir);
+        
+        return Path.Combine(outputDir, BuildSafeFileName(userInput));
+    }
+
+    private static string BuildSafeFileName(string? input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return GenerateTimestampedFileName();
+
+        var fileName = Path.GetFileName(input);
+        
+        var sanitized = InvalidCharsRegex().Replace(fileName, "_").Trim().Trim('_', '.');
+        
+        return string.IsNullOrWhiteSpace(sanitized) 
+            ? GenerateTimestampedFileName()
+            : Path.ChangeExtension(sanitized, ".pdf");
+    }
+
+    private static string GenerateTimestampedFileName() =>
+        $"document_{TimeProvider.GetUtcNow().ToUnixTimeMilliseconds()}.pdf";
 
     [ExcludeFromCodeCoverage]
     public static void Open(string path)
     {
-        var (cmd, args) = OperatingSystem.IsWindows() ? ("cmd", $"/c start \"\" \"{path}\"") :
-            OperatingSystem.IsMacOS() ? ("open", path) :
-            ("xdg-open", path);
-
         Process.Start(new ProcessStartInfo
         {
-            FileName = cmd,
-            Arguments = args,
+            FileName = OperatingSystem.IsWindows() ? "cmd" : OperatingSystem.IsMacOS() ? "open" : "xdg-open",
+            Arguments = OperatingSystem.IsWindows() ? $"/c start \"\" \"{path}\"" : path,
             UseShellExecute = true,
             CreateNoWindow = true
         });
@@ -30,60 +51,13 @@ internal static class FileOperations
     [ExcludeFromCodeCoverage]
     public static void ShowDirectory(string path)
     {
-        var (cmd, args) = OperatingSystem.IsWindows() ? ("explorer", $"/select,\"{path}\"") :
-            OperatingSystem.IsMacOS() ? ("open", $"-R {path}") :
-            ("xdg-open", Path.GetDirectoryName(path)!);
-
         Process.Start(new ProcessStartInfo
         {
-            FileName = cmd,
-            Arguments = args,
+            FileName = OperatingSystem.IsWindows() ? "explorer" : OperatingSystem.IsMacOS() ? "open" : "xdg-open",
+            Arguments = OperatingSystem.IsWindows() ? $"/select,\"{path}\"" : 
+                       OperatingSystem.IsMacOS() ? $"-R {path}" : Path.GetDirectoryName(path)!,
             UseShellExecute = true,
             CreateNoWindow = true
         });
-    }
-
-    public static string GetOutputPath(string? filename)
-    {
-        var outputDir = GetUserFriendlyDirectory("output");
-        var name = BuildSafeFileName(filename);
-        return Path.Combine(outputDir, name);
-    }
-
-    internal static string GetUserFriendlyDirectory(string subdir)
-    {
-        var projectRoot = FindProjectRoot();
-        return projectRoot != null
-            ? Directory.CreateDirectory(Path.Combine(projectRoot, subdir)).FullName
-            : Directory.CreateDirectory(subdir).FullName;
-    }
-
-    private static string? FindProjectRoot()
-    {
-        var current = Directory.GetCurrentDirectory();
-        for (var dir = new DirectoryInfo(current); dir != null; dir = dir.Parent)
-        {
-            if (dir.EnumerateFiles("*.csproj").Any() || dir.EnumerateFiles("*.sln").Any())
-                return dir.FullName;
-        }
-
-        return null;
-    }
-
-    private static string BuildSafeFileName(string? filename)
-    {
-        if (string.IsNullOrEmpty(filename))
-            return $"document_{DateTime.Now:yyyyMMddHHmmss}.pdf";
-
-        var sanitized = filename.AsSpan().IndexOfAny(InvalidFileChars) >= 0
-            ? string.Create(filename.Length, filename, (chars, state) =>
-            {
-                state.AsSpan().CopyTo(chars);
-                chars.ReplaceAny(InvalidFileChars, '_');
-            })
-            : filename;
-
-        var nameWithoutExt = Path.GetFileNameWithoutExtension(sanitized);
-        return $"{nameWithoutExt}.pdf";
     }
 }

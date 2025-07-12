@@ -1,4 +1,4 @@
-namespace CreatePdf.NET.Public;
+namespace CreatePdf.NET;
 
 /// <summary>
 /// Configuration options for OCR processing.
@@ -19,11 +19,6 @@ public sealed class OcrOptions
     /// Tesseract page segmentation mode (default: 6).
     /// </summary>
     public int PageSegmentationMode { get; set; } = 6;
-    
-    /// <summary>
-    /// Output directory for OCR files (default: "ocr").
-    /// </summary>
-    public string OutputDirectory { get; set; } = "ocr";
     
     /// <summary>
     /// Custom Tesseract executable path (optional).

@@ -1,7 +1,5 @@
 using AwesomeAssertions;
 using CreatePdf.NET.Internal;
-using CreatePdf.NET.Public;
-using Xunit.Abstractions;
 
 namespace CreatePdf.NET.Tests;
 
@@ -30,29 +28,55 @@ public class OcrServiceTests
         ocrResult.Should().NotBeNullOrWhiteSpace()
             .And.Contain("Hello World", "OCR should accurately read bitmap text from the PDF");
     }
-}
 
-public class OcrToolsTests
-{
-    private readonly ITestOutputHelper _testOutputHelper;
-
-    public OcrToolsTests(ITestOutputHelper testOutputHelper)
+    [Fact]
+    public async Task Load_PdfFromStream_ExtractsTextSuccessfully()
     {
-        _testOutputHelper = testOutputHelper;
+        var pdfPath = await Pdf.Create()
+            .AddText("Stream Test Content")
+            .AddLine()
+            .AddText("This PDF was loaded from a stream")
+            .SaveAsync("stream_test.pdf");
+
+        var pdfBytes = await File.ReadAllBytesAsync(pdfPath);
+        using var stream = new MemoryStream(pdfBytes);
+
+        var extractedText = await Pdf.Load(stream).OcrAsync();
+
+        extractedText.Should().NotBeNullOrWhiteSpace()
+            .And.Contain("Stream Test Content")
+            .And.Contain("This PDF was loaded from a stream");
+    }
+
+    [Fact] 
+    public async Task ProcessPdfStreamAsync_HandlesCleanupErrorsGracefully()
+    {
+        var pdfBytes = await File.ReadAllBytesAsync(await Pdf.Create()
+            .AddText("Exception Test")
+            .SaveAsync());
+
+        using var stream = new MemoryStream(pdfBytes);
+        
+        await Pdf.Load(stream).OcrAsync();
     }
 
     [Fact]
-    public void GetTesseractArguments_ValidPaths_ReturnsProperArguments()
+    public void TryDeleteFile_ExistingFile_DeletesSuccessfully()
     {
-        var options = new OcrOptions();
-        var args = OcrTools.GetTesseractArguments("input.png", "output", options);
-    
-        _testOutputHelper.WriteLine($"Tesseract arguments: {args}");
+        var tempFile = Path.GetTempFileName();
+        File.Exists(tempFile).Should().BeTrue();
 
-        args.Should()
-            .StartWith("\"input.png\"", "input file should be first argument")
-            .And.Contain("\"output\"", "output base name should be second argument")
-            .And.Contain("-l eng", "should specify English language")
-            .And.EndWith("--psm 6", "should use page segmentation mode 6");
+        OcrService.TryDeleteFile(tempFile);
+
+        File.Exists(tempFile).Should().BeFalse();
+    }
+
+    [Fact]
+    public void TryDeleteFile_NonExistentFile_DoesNotThrow()
+    {
+        var nonExistentFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+        
+        var act = () => OcrService.TryDeleteFile(nonExistentFile);
+        act.Should().NotThrow();
     }
 }

@@ -1,5 +1,4 @@
 using System.Buffers;
-using CreatePdf.NET.Public;
 
 namespace CreatePdf.NET.Internal;
 

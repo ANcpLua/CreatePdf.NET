@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
-using CreatePdf.NET.Public;
 
-namespace CreatePdf.NET.Internal;
+namespace CreatePdf.NET.Tests;
 
 internal interface ITestLogger
 {

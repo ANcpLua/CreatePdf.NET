@@ -1,4 +1,4 @@
-namespace CreatePdf.NET.Public;
+namespace CreatePdf.NET;
 
 /// <summary>
 /// Specifies text alignment options.

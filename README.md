@@ -61,10 +61,9 @@ await Pdf.Load(pdfStream).OcrAsync(new OcrOptions
 | **Windows** |Download [Tesseract](https://github.com/UB-Mannheim/tesseract/wiki) and [Ghostscript](https://www.ghostscript.com/download/gsdnld.html) |
 | **Linux**   |`sudo apt-get install ghostscript tesseract-ocr`                                                                                        |
 
-> **Note**: Only needed for OCR. 
-> 
-> PDF generation works without it.
+> **Note**: Only needed for OCR.
 >
+> PDF generation works without it.
 
 ## Installation
 
@@ -72,10 +71,8 @@ await Pdf.Load(pdfStream).OcrAsync(new OcrOptions
 dotnet add package CreatePdf.NET --prerelease
 ```
 
-## Requirements
-
-- .NET 10.0 (Preview)
+###  Requirements
+- .NET 8.0, 9.0, or 10.0 SDK
 
 ## License
-
 This project is licensed under the [MIT License](LICENSE).

@@ -3,11 +3,10 @@
 [![NuGet](https://img.shields.io/nuget/v/CreatePdf.NET?label=NuGet&color=0891B2)](https://www.nuget.org/packages/CreatePdf.NET/)
 [![License](https://img.shields.io/github/license/ANcpLua/CreatePdf.NET?label=License&color=white)](https://github.com/ANcpLua/CreatePdf.NET/blob/main/LICENSE)
 [![Docker](https://img.shields.io/docker/v/ancplua/createpdf.net?label=Docker&color=0C4A6E)](https://hub.docker.com/r/ancplua/createpdf.net)
+
 # CreatePdf.NET
 
-A simple, .NET library for PDF creation with text and bitmap rendering,
-plus [optional OCR functionality](#to-enable-ocr-functionality) for text extraction.
-
+A simple, .NET library for PDF creation with text and bitmap rendering, plus [optional OCR functionality](#to-enable-ocr-functionality) for text extraction.
 
 ## Usage
 
@@ -57,11 +56,11 @@ await Pdf.Load(pdfStream).OcrAsync(new OcrOptions
 
 ### To enable OCR functionality
 
-| Platform    | Installation                                                                                                                            |
-|-------------|-----------------------------------------------------------------------------------------------------------------------------------------|
-| **macOS**   | `brew install tesseract`                                                                                                                |
-| **Windows** | Download [Tesseract](https://github.com/UB-Mannheim/tesseract/wiki) and [Ghostscript](https://www.ghostscript.com/download/gsdnld.html) |
-| **Linux**   | `sudo apt-get install ghostscript tesseract-ocr`                                                                                        |
+| Platform | Installation |
+|----------|-------------|
+| **macOS** |`brew install tesseract` |
+| **Windows** |Download [Tesseract](https://github.com/UB-Mannheim/tesseract/wiki) and [Ghostscript](https://www.ghostscript.com/download/gsdnld.html) |
+| **Linux**   |`sudo apt-get install ghostscript tesseract-ocr`                                                                                        |
 
 > **Note**: Only needed for OCR. 
 > 
@@ -81,4 +80,3 @@ dotnet add package CreatePdf.NET --prerelease
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
-

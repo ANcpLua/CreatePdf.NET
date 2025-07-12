@@ -36,7 +36,7 @@ jobs:
             type=ref,event=tag
             type=sha,prefix={{branch}}-
             type=raw,value=latest
-            type=raw,value=preview-10.0
+            type=raw,value=net8-9-10
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5

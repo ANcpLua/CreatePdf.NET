@@ -204,4 +204,31 @@ public class FileOperationsTests
 
         Path.GetFileName(result).Should().Be(expectedFilename);
     }
+
+    [Fact]
+    public void GetOutputPath_FromDeepBinDirectory_CreatesOutputInProjectRoot()
+    {
+        var result = FileOperations.GetOutputPath("test.pdf");
+    
+        result.Should().Contain("output");
+    
+        result.Should().NotContain("bin/Debug");
+        result.Should().NotContain("bin/Release");
+    
+        var outputDir = Path.GetDirectoryName(result);
+        Directory.Exists(outputDir).Should().BeTrue();
+        
+        var pathSegments = result.Split(Path.DirectorySeparatorChar);
+        pathSegments.Should().NotContain("net8.0");
+        pathSegments.Should().NotContain("net9.0");
+        pathSegments.Should().NotContain("net10.0");
+    }
+
+    [Fact]
+    public void FindProjectRoot_WhenNoProjectFiles_ReturnsNull()
+    {
+        var result = FileOperations.FindProjectRoot(Path.GetTempPath());
+    
+        result.Should().BeNull();
+    }
 }

@@ -1,9 +1,8 @@
 [![codecov](https://codecov.io/gh/ANcpLua/CreatePdf.NET/branch/main/graph/badge.svg?token=lgxIXBnFrn)](https://codecov.io/gh/ANcpLua/CreatePdf.NET)
-[![.NET](https://img.shields.io/badge/.NET-10.0_Preview-512BD4)](https://dotnet.microsoft.com/download/dotnet/10.0)
+[![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4)](https://dotnet.microsoft.com/download/dotnet/8.0) [![.NET 9](https://img.shields.io/badge/.NET-9.0-6366F1)](https://dotnet.microsoft.com/download/dotnet/9.0) [![.NET 10](https://img.shields.io/badge/.NET-10.0_Preview-7C3AED)](https://dotnet.microsoft.com/download/dotnet/10.0)
 [![NuGet](https://img.shields.io/nuget/v/CreatePdf.NET?label=NuGet&color=0891B2)](https://www.nuget.org/packages/CreatePdf.NET/)
 [![License](https://img.shields.io/github/license/ANcpLua/CreatePdf.NET?label=License&color=white)](https://github.com/ANcpLua/CreatePdf.NET/blob/main/LICENSE)
 [![Docker](https://img.shields.io/docker/v/ancplua/createpdf.net?label=Docker&color=0C4A6E)](https://hub.docker.com/r/ancplua/createpdf.net)
-
 # CreatePdf.NET
 
 A simple, .NET library for PDF creation with text and bitmap rendering, plus [optional OCR functionality](#to-enable-ocr-functionality) for text extraction.
@@ -23,11 +22,11 @@ await Pdf.Create()
 
 await Pdf.Create()
     .AddText("Hello World!")
-    .SaveAndOcr("text-ocr-demo");
+    .SaveAndOcrAsync("text-ocr-demo");
 
 await Pdf.Create()
     .AddPixelText("Hello World!")
-    .SaveAndOcr("pixel-ocr-demo");
+    .SaveAndOcrAsync("pixel-ocr-demo");
 
 await Pdf.Create()
     .AddText("Hello World!", Dye.Blue, TextSize.Large)

@@ -4,6 +4,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreatePdf.NET", "CreatePdf.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreatePdf.NET.Tests", "CreatePdf.NET.Tests\CreatePdf.NET.Tests.csproj", "{DEBD12A1-01FD-45D6-A75C-039ED06406C1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestNet9", "TestNet9\TestNet9.csproj", "{C9E426D1-4AAB-4123-B672-40193653EF51}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestNet8", "TestNet8\TestNet8.csproj", "{645E5561-1E3F-4463-90FC-79EB1F1D0867}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +22,13 @@ Global
 		{DEBD12A1-01FD-45D6-A75C-039ED06406C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DEBD12A1-01FD-45D6-A75C-039ED06406C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DEBD12A1-01FD-45D6-A75C-039ED06406C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9E426D1-4AAB-4123-B672-40193653EF51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9E426D1-4AAB-4123-B672-40193653EF51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9E426D1-4AAB-4123-B672-40193653EF51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9E426D1-4AAB-4123-B672-40193653EF51}.Release|Any CPU.Build.0 = Release|Any CPU
+		{645E5561-1E3F-4463-90FC-79EB1F1D0867}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{645E5561-1E3F-4463-90FC-79EB1F1D0867}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{645E5561-1E3F-4463-90FC-79EB1F1D0867}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{645E5561-1E3F-4463-90FC-79EB1F1D0867}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

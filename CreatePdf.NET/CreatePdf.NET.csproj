@@ -6,7 +6,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
 
         <PackageId>CreatePdf.NET</PackageId>
-        <Version>1.0.4</Version>
+        <Version>1.1.0</Version>
         <Authors>Alexander Nachtmann</Authors>
         <Description>A simple, .NET library for PDF creation with text and bitmap rendering, plus optional OCR functionality for text extraction.</Description>
         <PackageTags>pdf;document;generation;lightweight;net10;preview;ocr</PackageTags>

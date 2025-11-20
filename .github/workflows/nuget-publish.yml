@@ -14,6 +14,9 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     
     steps:
       - name: Checkout code
@@ -44,10 +47,13 @@ jobs:
       - name: Pack NuGet package
         run: dotnet pack CreatePdf.NET/CreatePdf.NET.csproj --configuration Release --no-build --output ./nupkg -p:GeneratePackageOnBuild=false
 
+      - name: Authenticate with NuGet
+        uses: NuGet/login@v1
+        if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+
       - name: Publish packages to NuGet.org
         if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
         run: |
           dotnet nuget push ./nupkg/*.nupkg \
-            --api-key ${{ secrets.NUGET_API_KEY }} \
             --source https://api.nuget.org/v3/index.json \
             --skip-duplicate

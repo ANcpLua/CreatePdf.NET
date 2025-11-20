@@ -1,6 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
     <LangVersion>14</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -53,46 +55,4 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
-
-  <Target Name="ReorderNuspecDependencies" AfterTargets="GenerateNuspec">
-    <PropertyGroup>
-      <NuspecFileName>$(NuspecOutputPath)$(PackageId).$(Version).nuspec</NuspecFileName>
-      <PyScriptPath>$(NuspecOutputPath)reorder.py</PyScriptPath>
-      <ReorderScript>
-<![CDATA[
-import sys
-import re
-
-file_path = sys.argv[1]
-with open(file_path, 'r') as f:
-    content = f.read()
-
-match = re.search(r'<dependencies>(.*?)</dependencies>', content, re.DOTALL)
-if match:
-    block = match.group(1)
-    groups = re.findall(r'<group targetFramework="([^"]+)" />', block)
-    
-    def score(fw):
-        if 'net10' in fw: return 3
-        if 'net9' in fw: return 2
-        if 'net8' in fw: return 1
-        return 0
-        
-    groups.sort(key=score, reverse=True)
-    
-    new_lines = [f'      <group targetFramework="{g}" />' for g in groups]
-    new_block = '\n' + '\n'.join(new_lines) + '\n    '
-    
-    new_content = content.replace(match.group(0), f'<dependencies>{new_block}</dependencies>')
-    
-    with open(file_path, 'w') as f:
-        f.write(new_content)
-    print(f"Reordered dependencies in {file_path}")
-]]>
-      </ReorderScript>
-    </PropertyGroup>
-
-    <WriteLinesToFile File="$(PyScriptPath)" Lines="$(ReorderScript)" Overwrite="true" />
-    <Exec Command="python3 &quot;$(PyScriptPath)&quot; &quot;$(NuspecFileName)&quot;" />
-  </Target>
 </Project>

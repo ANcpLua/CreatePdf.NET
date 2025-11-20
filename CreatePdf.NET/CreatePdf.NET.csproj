@@ -11,7 +11,7 @@
     <Authors>Alexander Nachtmann</Authors>
     <Summary>Lightweight PDF generation library for .NET 10/9/8 with text rendering, bitmap graphics, and OCR</Summary>
     <Description>CreatePdf.NET is a simple, fast PDF creation library for .NET applications. Generate PDF documents with text rendering, bitmap graphics, and optional OCR text extraction. Lightweight, dependency-free, 100% test coverage. Perfect for creating reports, invoices, receipts, labels, and documents. Supports .NET 10, .NET 9, and .NET 8 with fluent C# API.</Description>
-    <PackageTags>pdf;pdf-generation;pdf-creator;pdf-library;create-pdf;generate-pdf;document;csharp;c#;dotnet;net10;net9;net8;text-rendering;bitmap;graphics;ocr;tesseract;report;invoice;receipt;label;lightweight;simple;fast;fluent-api;dependency-free</PackageTags>
+    <PackageTags>pdf pdf-generation pdf-generator pdf-creator pdf-library create-pdf generate-pdf document-generation csharp dotnet net10 net9 net8 text-rendering bitmap graphics ocr tesseract report-generation invoice-generation invoice receipt label reports invoices lightweight fast dependency-free managed-code cross-platform linux docker azure aws-lambda microservices</PackageTags>
     <RepositoryUrl>https://github.com/ANcpLua/CreatePdf.NET</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>

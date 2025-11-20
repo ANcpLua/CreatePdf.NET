@@ -1,9 +1,9 @@
 namespace CreatePdf.NET.Internal;
 
 /// <summary>
-///     Defines the contract for an OCR engine capable of rasterizing PDF pages and extracting text from images.
+///     Defines the contract for an OCR provider capable of rasterizing PDF pages and extracting text from images.
 /// </summary>
-internal interface IPdfOcrEngine
+internal interface IOcrProvider
 {
     /// <summary>
     ///     Rasterizes a PDF page to a PNG image.

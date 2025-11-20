@@ -17,9 +17,9 @@
     <!-- Test Framework -->
     <PackageReference Include="xunit" Version="2.9.3"/>
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5"/>
-    <PackageReference Include="xunit.analyzers" Version="1.18.0">
+    <PackageReference Include="xunit.analyzers" Version="1.25.0">
       <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>analyzers; buildtransitive</IncludeAssets>
+      <IncludeAssets>build; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
 
     <!-- Test Utilities -->
@@ -27,6 +27,10 @@
     <PackageReference Include="AwesomeAssertions" Version="9.3.0"/>
     <PackageReference Include="NSubstitute" Version="5.3.0"/>
     <PackageReference Include="coverlet.collector" Version="6.0.4"/>
+    <PackageReference Update="ErrorProne.NET.CoreAnalyzers" Version="0.1.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>

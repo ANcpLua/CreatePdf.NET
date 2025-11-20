@@ -1,5 +1,3 @@
-using AwesomeAssertions;
-using AwesomeAssertions.Execution;
 using CreatePdf.NET.Internal;
 
 namespace CreatePdf.NET.Tests;
@@ -54,7 +52,7 @@ public class TextWrapperTests
         var result = TextWrapper.Wrap(text, 12, 150);
 
         result.Should().HaveCountGreaterThan(1);
-        result.Should().NotContain(line => line.EndsWith(" "), "lines should be trimmed");
+        result.Should().NotContain(line => line.EndsWith(' '), "lines should be trimmed");
         result.Should().OnlyContain(line => TextWrapper.Measure(line, 12) <= 150);
     }
 
@@ -132,8 +130,10 @@ public class TextWrapperTests
     [Fact]
     public void Wrap_RealWorldExample_HandlesCorrectly()
     {
-        const string text = @"This is a real-world example of text that might appear in a PDF document. 
-It contains multiple sentences, various punctuation marks, and even some numbers like 123.45!";
+        const string text = """
+                            This is a real-world example of text that might appear in a PDF document.
+                            It contains multiple sentences, various punctuation marks, and even some numbers like 123.45!
+                            """;
 
         var result = TextWrapper.Wrap(text, 14, 400);
 

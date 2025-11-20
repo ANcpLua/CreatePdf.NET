@@ -3,22 +3,12 @@ using System.Diagnostics.CodeAnalysis;
 namespace CreatePdf.NET;
 
 /// <summary>
-/// Defines scale factors for pixel-based text rendering.
+///     Defines scale factors for pixel-based text rendering.
 /// </summary>
-[ExcludeFromCodeCoverage]
-public readonly struct PixelTextSize
+/// <param name="Value">The scale multiplier for pixel text rendering.</param>
+[ExcludeFromCodeCoverage(Justification = "Data record")]
+public readonly record struct PixelTextSize(int Value)
 {
-    /// <summary>
-    /// Gets the scale multiplier for pixel text rendering.
-    /// </summary>
-    /// <value>The scale factor (1-5) that determines the final pixel size.</value>
-    public int Value { get; }
-
-    private PixelTextSize(int value)
-    {
-        Value = value;
-    }
-
     /// <summary>Tiny scale (1x).</summary>
     public static readonly PixelTextSize Tiny = new(1);
 

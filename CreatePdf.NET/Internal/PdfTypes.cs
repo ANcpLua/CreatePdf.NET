@@ -13,25 +13,19 @@ internal interface IPdfCanvas
     void DrawBitmapText(string text, Dye textDye, Dye backgroundDye, int scale);
 }
 
-[ExcludeFromCodeCoverage]
+[ExcludeFromCodeCoverage(Justification = "Data record")]
 internal record TextContent(string Text, int Size, Dye Dye, TextAlignment Alignment) : IContent
 {
-    public void Render(IPdfCanvas canvas)
-    {
-        canvas.DrawText(Text, Size, Dye, Alignment);
-    }
+    public void Render(IPdfCanvas canvas) => canvas.DrawText(Text, Size, Dye, Alignment);
 }
 
-[ExcludeFromCodeCoverage]
+[ExcludeFromCodeCoverage(Justification = "Data record")]
 internal record BitmapTextContent(string Text, Dye TextDye, Dye BackgroundDye, int Scale) : IContent
 {
-    public void Render(IPdfCanvas canvas)
-    {
-        canvas.DrawBitmapText(Text, TextDye, BackgroundDye, Scale);
-    }
+    public void Render(IPdfCanvas canvas) => canvas.DrawBitmapText(Text, TextDye, BackgroundDye, Scale);
 }
 
-[ExcludeFromCodeCoverage]
+[ExcludeFromCodeCoverage(Justification = "Data record")]
 internal record ImageResource(int Id, int Width, int Height, byte[] RgbData);
 
 internal static class Layout

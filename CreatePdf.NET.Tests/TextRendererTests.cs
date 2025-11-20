@@ -1,11 +1,13 @@
-using AwesomeAssertions;
-using AwesomeAssertions.Execution;
+using System.Globalization;
 using CreatePdf.NET.Internal;
 
 namespace CreatePdf.NET.Tests;
 
 public class TextRendererTests
 {
+    private static int CalculateExpectedWidth(int charCount, int scale = 3) =>
+        charCount * (TextRenderer.CharWidth + 1) * scale - 1 * scale + 20;
+
     [Fact]
     public void RenderBitmap_WithEmptyText_CreatesMinimalImage()
     {
@@ -24,11 +26,7 @@ public class TextRendererTests
     {
         using var image = TextRenderer.RenderBitmap("A", Dye.Red, Dye.Blue);
 
-        image.Should().BeEquivalentTo(new
-        {
-            Width = 44,
-            Height = 56
-        });
+        image.Should().BeEquivalentTo(new { Width = 44, Height = 56 });
     }
 
     [Fact]
@@ -38,8 +36,7 @@ public class TextRendererTests
 
         using var image = TextRenderer.RenderBitmap(text, Dye.Black, Dye.White);
 
-        var expectedWidth = text.Length * (TextRenderer.CharWidth + 1) * 3 - 1 * 3 + 20;
-        image.Width.Should().Be(expectedWidth);
+        image.Width.Should().Be(CalculateExpectedWidth(text.Length));
     }
 
     [Theory]
@@ -50,8 +47,7 @@ public class TextRendererTests
     {
         using var image = TextRenderer.RenderBitmap(input, Dye.Black, Dye.White);
 
-        var expectedWidth = expectedChars * (TextRenderer.CharWidth + 1) * 3 - 1 * 3 + 20;
-        image.Width.Should().Be(expectedWidth);
+        image.Width.Should().Be(CalculateExpectedWidth(expectedChars));
     }
 
     [Fact]
@@ -59,8 +55,7 @@ public class TextRendererTests
     {
         using var image = TextRenderer.RenderBitmap("A🚀B", Dye.Black, Dye.White);
 
-        const int expectedWidth = 2 * (TextRenderer.CharWidth + 1) * 3 - 1 * 3 + 20;
-        image.Width.Should().Be(expectedWidth);
+        image.Width.Should().Be(CalculateExpectedWidth(2));
     }
 
     [Theory]
@@ -71,11 +66,7 @@ public class TextRendererTests
     {
         using var image = TextRenderer.RenderBitmap("A", Dye.Black, Dye.White, scale);
 
-        image.Should().BeEquivalentTo(new
-        {
-            Width = expectedWidth,
-            Height = expectedHeight
-        });
+        image.Should().BeEquivalentTo(new { Width = expectedWidth, Height = expectedHeight });
     }
 
     [Fact]
@@ -85,8 +76,7 @@ public class TextRendererTests
 
         using var image = TextRenderer.RenderBitmap(specialChars, Dye.Black, Dye.White);
 
-        var expectedWidth = specialChars.Length * (TextRenderer.CharWidth + 1) * 3 - 1 * 3 + 20;
-        image.Width.Should().Be(expectedWidth);
+        image.Width.Should().Be(CalculateExpectedWidth(specialChars.Length));
     }
 
     [Theory]
@@ -125,7 +115,7 @@ public class TextRendererTests
 
         TextRenderer.RenderGlyph(bitmap, width, glyph, 20, 20, 2);
 
-        bitmap.Should().Contain(true, "character 'I' should have visible pixels");
+        bitmap.Should().Contain(expected: true, "character 'I' should have visible pixels");
     }
 
     [Fact]
@@ -208,8 +198,8 @@ public class TextRendererTests
         var pixels = image.GetPixelMemory().ToArray();
 
         pixels.Chunk(3)
-            .Should().Contain(rgb => rgb.SequenceEqual(new byte[] { 255, 255, 255 }), "should have white pixels")
-            .And.Contain(rgb => rgb.SequenceEqual(new byte[] { 0, 0, 0 }), "should have black pixels");
+            .Should().Contain(rgb => rgb.AsEnumerable().SequenceEqual(new byte[] { 255, 255, 255 }), "should have white pixels")
+            .And.Contain(rgb => rgb.AsEnumerable().SequenceEqual(new byte[] { 0, 0, 0 }), "should have black pixels");
     }
 
     [Fact]
@@ -217,8 +207,7 @@ public class TextRendererTests
     {
         var testCases = new[]
         {
-            (chars: 1, scale: 1, expectedW: 28),
-            (chars: 1, scale: 3, expectedW: 44),
+            (chars: 1, scale: 1, expectedW: 28), (chars: 1, scale: 3, expectedW: 44),
             (chars: 3, scale: 1, expectedW: 46)
         };
 
@@ -228,7 +217,7 @@ public class TextRendererTests
             using var image = TextRenderer.RenderBitmap(text, Dye.Black, Dye.White, scale);
 
             image.Width.Should().Be(expectedW,
-                $"for {chars} chars at scale {scale}");
+                string.Create(CultureInfo.InvariantCulture, $"for {chars} chars at scale {scale}"));
         }
     }
 }

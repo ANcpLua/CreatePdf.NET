@@ -1,4 +1,4 @@
-﻿FROM mcr.microsoft.com/dotnet/sdk:10.0-preview AS build
+﻿FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 
 WORKDIR /app
 
@@ -13,7 +13,7 @@ RUN dotnet add reference /app/CreatePdf.NET/CreatePdf.NET.csproj
 RUN echo 'using CreatePdf.NET.Public;\n\
 \n\
 await Pdf.Create()\n\
-    .AddText("Hello from Docker!", Dye.Blue, TextSize.Large)\n\
+    .AddText("Hello from Docker!", color: Dye.Blue, size: TextSize.Large)\n\
     .AddLine()\n\
     .AddText("CreatePdf.NET Demo")\n\
     .AddLine()\n\

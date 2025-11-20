@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -23,6 +24,8 @@ internal sealed class PdfWriter : IPdfCanvas, IAsyncDisposable
         _background = background;
         StartNewPage();
     }
+
+    public async ValueTask DisposeAsync() => await _buffer.DisposeAsync();
 
     public void DrawText(string text, int size, Dye dye, TextAlignment alignment)
     {
@@ -52,21 +55,32 @@ internal sealed class PdfWriter : IPdfCanvas, IAsyncDisposable
         var charWidth = TextRenderer.CharWidth * scale;
         var maxCharsPerLine = (int)(Layout.ContentWidth / charWidth);
 
-        foreach (var line in text.Split('\n', StringSplitOptions.TrimEntries))
+        var span = text.AsSpan();
+        var start = 0;
+        while (start < span.Length)
         {
-            if (string.IsNullOrEmpty(line)) continue;
+            var index = span[start..].IndexOf('\n');
+            var lineLength = index == -1 ? span.Length - start : index;
+            var line = span.Slice(start, lineLength).Trim();
 
-            var pos = 0;
-            while (pos < line.Length)
+            var nextStart = index == -1 ? span.Length : start + index + 1;
+
+            if (!line.IsEmpty)
             {
-                var length = Math.Min(maxCharsPerLine, line.Length - pos);
-                var chunk = line.Substring(pos, length);
+                var pos = 0;
+                while (pos < line.Length)
+                {
+                    var length = Math.Min(maxCharsPerLine, line.Length - pos);
+                    var chunk = line.Slice(pos, length);
 
-                var image = TextRenderer.RenderBitmap(chunk, textDye, backgroundDye, scale);
-                DrawImage(image);
+                    using var image = TextRenderer.RenderBitmap(chunk, textDye, backgroundDye, scale);
+                    DrawImage(image);
 
-                pos += length;
+                    pos += length;
+                }
             }
+
+            start = nextStart;
         }
     }
 
@@ -119,10 +133,10 @@ internal sealed class PdfWriter : IPdfCanvas, IAsyncDisposable
             await WriteImageAsync(image);
 
         await WriteObject(pagesId,
-            $"<< /Type /Pages /Kids [{string.Join(" ", pageIds.Select(id => $"{id} 0 R"))}] /Count {pageIds.Count} >>");
+            $"<< /Type /Pages /Kids [{string.Join(" ", pageIds.Select(id => $"{id.ToString(CultureInfo.InvariantCulture)} 0 R"))}] /Count {pageIds.Count.ToString(CultureInfo.InvariantCulture)} >>");
 
         await WriteObject(catalogId,
-            $"<< /Type /Catalog /Pages {pagesId} 0 R >>");
+            $"<< /Type /Catalog /Pages {pagesId.ToString(CultureInfo.InvariantCulture)} 0 R >>");
 
         await WriteXRefAndTrailerAsync(catalogId);
 
@@ -141,16 +155,16 @@ internal sealed class PdfWriter : IPdfCanvas, IAsyncDisposable
             contentBytes,
             "endstream");
 
-        var resources = $"<< /Font << /Helvetica {fontId} 0 R >>";
+        var resources = $"<< /Font << /Helvetica {fontId.ToString(CultureInfo.InvariantCulture)} 0 R >>";
         if (page.HasImages)
-            resources += $" /XObject << {string.Join(" ", page.ImageIds.Select(id => $"/Im{id} {id} 0 R"))} >>";
+            resources += $" /XObject << {string.Join(" ", page.ImageIds.Select(id => $"/Im{id.ToString(CultureInfo.InvariantCulture)} {id.ToString(CultureInfo.InvariantCulture)} 0 R"))} >>";
         resources += " >>";
 
         await WriteObject(page.Id,
             $"""
-             << /Type /Page /Parent {pagesId} 0 R 
-                /MediaBox [0 0 {Layout.PageWidth:F2} {Layout.PageHeight:F2}] 
-                /Contents {contentId} 0 R 
+             << /Type /Page /Parent {pagesId.ToString(CultureInfo.InvariantCulture)} 0 R
+                /MediaBox [0 0 {Layout.PageWidth.ToString("F2", CultureInfo.InvariantCulture)} {Layout.PageHeight.ToString("F2", CultureInfo.InvariantCulture)}]
+                /Contents {contentId.ToString(CultureInfo.InvariantCulture)} 0 R
                 /Resources {resources} >>
              """);
 
@@ -161,10 +175,10 @@ internal sealed class PdfWriter : IPdfCanvas, IAsyncDisposable
     {
         await WriteObject(image.Id,
             $"""
-             << /Type /XObject /Subtype /Image 
-                /Width {image.Width} /Height {image.Height} 
-                /ColorSpace /DeviceRGB /BitsPerComponent 8 
-                /Length {image.RgbData.Length} >>
+             << /Type /XObject /Subtype /Image
+                /Width {image.Width.ToString(CultureInfo.InvariantCulture)} /Height {image.Height.ToString(CultureInfo.InvariantCulture)}
+                /ColorSpace /DeviceRGB /BitsPerComponent 8
+                /Length {image.RgbData.Length.ToString(CultureInfo.InvariantCulture)} >>
              """,
             "stream",
             image.RgbData,
@@ -177,7 +191,7 @@ internal sealed class PdfWriter : IPdfCanvas, IAsyncDisposable
         ref var offset = ref CollectionsMarshal.GetValueRefOrAddDefault(_offsets, id, out _);
         offset = _buffer.Position;
 
-        await WriteLineAsync($"{id} 0 obj");
+        await WriteLineAsync($"{id.ToString(CultureInfo.InvariantCulture)} 0 obj");
         await WriteLineAsync(header);
 
         if (prefix != null)
@@ -200,15 +214,15 @@ internal sealed class PdfWriter : IPdfCanvas, IAsyncDisposable
         var xrefPos = _buffer.Position;
 
         await WriteLineAsync("xref");
-        await WriteLineAsync($"0 {_offsets.Count + 1}");
+        await WriteLineAsync($"0 {(_offsets.Count + 1).ToString(CultureInfo.InvariantCulture)}");
         await WriteLineAsync("0000000000 65535 f ");
 
         foreach (var (_, offset) in _offsets.OrderBy(x => x.Key))
-            await WriteLineAsync($"{offset:D10} 00000 n ");
+            await WriteLineAsync($"{offset.ToString("D10", CultureInfo.InvariantCulture)} 00000 n ");
 
-        await WriteLineAsync($"trailer << /Size {_offsets.Count + 1} /Root {rootId} 0 R >>");
+        await WriteLineAsync($"trailer << /Size {(_offsets.Count + 1).ToString(CultureInfo.InvariantCulture)} /Root {rootId.ToString(CultureInfo.InvariantCulture)} 0 R >>");
         await WriteLineAsync("startxref");
-        await WriteLineAsync(xrefPos.ToString());
+        await WriteLineAsync(xrefPos.ToString(CultureInfo.InvariantCulture));
         await _buffer.WriteAsync("%%EOF"u8.ToArray());
     }
 
@@ -217,10 +231,5 @@ internal sealed class PdfWriter : IPdfCanvas, IAsyncDisposable
         var bytes = Encoding.ASCII.GetBytes(text);
         await _buffer.WriteAsync(bytes);
         await _buffer.WriteAsync("\n"u8.ToArray());
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await _buffer.DisposeAsync();
     }
 }

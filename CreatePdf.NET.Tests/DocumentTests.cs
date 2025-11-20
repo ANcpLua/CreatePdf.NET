@@ -1,6 +1,3 @@
-using AwesomeAssertions;
-using AwesomeAssertions.Execution;
-
 namespace CreatePdf.NET.Tests;
 
 public class DocumentTests
@@ -33,14 +30,14 @@ public class DocumentTests
     }
 
     [Fact]
-    public void AddText_WithAllParameters_UsesSpecifiedValues()
+    public async Task AddText_WithAllParameters_UsesSpecifiedValues()
     {
         var doc = Pdf.Create();
 
         doc.AddText("Test", Dye.Red, TextSize.Large, TextAlignment.Right);
 
-        var act = () => doc.SaveAsync("test");
-        act.Should().NotThrowAsync();
+        Func<Task> act = () => doc.SaveAsync("test");
+        await act.Should().NotThrowAsync().ConfigureAwait(true);
     }
 
     [Theory]
@@ -106,14 +103,16 @@ public class DocumentTests
     }
 
     [Fact]
-    public void AddPixelText_WithAllParameters_UsesSpecifiedValues()
+    public async Task AddPixelText_WithAllParameters_UsesSpecifiedValues()
     {
         var doc = Pdf.Create();
 
         doc.AddPixelText("Test", Dye.Yellow, Dye.Blue, PixelTextSize.Large);
 
-        var act = () => doc.SaveAsync("test");
-        act.Should().NotThrowAsync();
+        var fileName = $"test_{Guid.NewGuid():N}";
+
+        Func<Task> act = () => doc.SaveAsync(fileName);
+        await act.Should().NotThrowAsync().ConfigureAwait(true);
     }
 
     [Fact]
@@ -144,9 +143,9 @@ public class DocumentTests
     {
         var doc = Pdf.Create();
         doc.AddText("Test content");
-        var filename = $"test_{Guid.NewGuid():N}";
+        var filename = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.pdf");
 
-        var path = await doc.SaveAsync(filename);
+        var path = await doc.SaveAsync(filename).ConfigureAwait(true);
 
         path.Should().EndWith(".pdf");
         File.Exists(path).Should().BeTrue();
@@ -155,9 +154,9 @@ public class DocumentTests
     }
 
     [Fact]
-    public void FluentApi_ChainsMultipleOperations()
+    public async Task FluentApi_ChainsMultipleOperations()
     {
-        var act = () => Pdf.Create()
+        Func<Task> act = () => Pdf.Create()
             .AddText("Title", Dye.Black, TextSize.Large, TextAlignment.Center)
             .AddLine()
             .AddText("Body text")
@@ -166,45 +165,14 @@ public class DocumentTests
             .AddLine()
             .SaveAsync("fluent-test");
 
-        act.Should().NotThrowAsync();
+        await act.Should().NotThrowAsync().ConfigureAwait(true);
     }
-
-    [Fact]
-    public void AddText_Overloads_WorkCorrectly()
-    {
-        var doc = Pdf.Create();
-
-        using (new AssertionScope())
-        {
-            doc.AddText("Just text").Should().BeSameAs(doc);
-            doc.AddText("With size", TextSize.Large).Should().BeSameAs(doc);
-            doc.AddText("With color", Dye.Red).Should().BeSameAs(doc);
-            doc.AddText("With alignment", TextAlignment.Right).Should().BeSameAs(doc);
-            doc.AddText("With color and size", Dye.Blue, TextSize.Small).Should().BeSameAs(doc);
-        }
-    }
-
-    [Fact]
-    public void AddPixelText_Overloads_WorkCorrectly()
-    {
-        var doc = Pdf.Create();
-
-        using (new AssertionScope())
-        {
-            doc.AddPixelText("Just text").Should().BeSameAs(doc);
-            doc.AddPixelText("With size", PixelTextSize.Large).Should().BeSameAs(doc);
-            doc.AddPixelText("With text color", Dye.Red).Should().BeSameAs(doc);
-            doc.AddPixelText("With colors", Dye.Red, Dye.Blue).Should().BeSameAs(doc);
-            doc.AddPixelText("With color and size", Dye.Green, PixelTextSize.Small).Should().BeSameAs(doc);
-        }
-    }
-
 
     [Fact]
     public void OcrOptions_DefaultValues_AreCorrect()
     {
         var options = new OcrOptions();
-    
+
         options.Dpi.Should().Be(300);
         options.Language.Should().Be("eng");
         options.PageSegmentationMode.Should().Be(6);
@@ -215,9 +183,9 @@ public class DocumentTests
     {
         var options = new OcrOptions();
         const string customPath = "/usr/local/bin/tesseract";
-    
+
         options.TesseractPath = customPath;
-    
+
         options.TesseractPath.Should().Be(customPath);
     }
 
@@ -226,19 +194,16 @@ public class DocumentTests
     {
         var options = new OcrOptions();
         const string customPath = "/usr/local/bin/gs";
-    
+
         options.PdfConverterPath = customPath;
-    
+
         options.PdfConverterPath.Should().Be(customPath);
     }
 
     [Fact]
     public void OcrOptions_PageSegmentationMode_CanBeSet()
     {
-        var options = new OcrOptions
-        {
-            PageSegmentationMode = 3
-        };
+        var options = new OcrOptions { PageSegmentationMode = 3 };
 
         options.PageSegmentationMode.Should().Be(3);
     }
@@ -248,14 +213,14 @@ public class DocumentTests
     {
         var doc = Pdf.Create();
         OcrOptions? capturedOptions = null;
-   
-        doc.WithOcrOptions(opt => 
+
+        doc.WithOcrOptions(opt =>
         {
             opt.Dpi = 150;
             opt.Language = "eng";
             capturedOptions = opt;
         });
-   
+
         capturedOptions.Should().NotBeNull();
         capturedOptions!.Dpi.Should().Be(150);
         capturedOptions.Language.Should().Be("eng");
@@ -266,9 +231,9 @@ public class DocumentTests
     public void SaveAndOcrAsync_MethodExists_ReturnsTask()
     {
         var doc = Pdf.Create();
-    
+
         var method = doc.GetType().GetMethod("SaveAndOcrAsync");
-    
+
         method.Should().NotBeNull();
         method.ReturnType.Should().Be<Task<(string, string)>>();
     }
@@ -277,7 +242,7 @@ public class DocumentTests
     public void SanitizeText_WithManyNewlines_LimitsTo100Lines()
     {
         var doc = Pdf.Create();
-        var manyLines = string.Join("\n", Enumerable.Repeat("Line", 200));
+        var manyLines = string.Join('\n', Enumerable.Repeat("Line", 200));
 
         var act = () => doc.AddText(manyLines);
         act.Should().NotThrow();

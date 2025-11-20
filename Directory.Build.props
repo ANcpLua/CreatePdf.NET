@@ -1,0 +1,69 @@
+<Project>
+  <!--
+    Centralized Build Configuration for CreatePdf.NET
+    This file applies to all projects in the solution.
+
+    Strategy: "Holy Trinity" of Analyzers for .NET 10 LTS
+    - Built-in .NET Analyzers (NetAnalyzers 10.0.100)
+    - Meziantou.Analyzer (2.0.254+) - Performance & Modern C# 14
+    - Roslynator.Analyzers (4.14.1+) - Simplification & Refactoring
+    - MS.VisualStudio.Threading.Analyzers (17.14.15+) - Async correctness
+  -->
+
+  <PropertyGroup>
+    <!-- .NET & C# Configuration -->
+    <LangVersion>14</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- Code Analysis Configuration -->
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
+    <!-- Meziantou Configuration: Enable all rules -->
+    <MeziantouAnalysisMode>All</MeziantouAnalysisMode>
+
+    <!-- Build Configuration: "Never break" philosophy -->
+    <!-- TreatWarningsAsErrors is set per-project, not globally -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!--
+      Core Analyzers: The "Fantastic Four"
+      These apply to ALL projects in the solution
+    -->
+
+    <!-- Meziantou: Performance, Security, Modern C# 14 Best Practices -->
+    <PackageReference Include="Meziantou.Analyzer" Version="2.0.254">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+
+    <!-- Roslynator: Code Simplification, Readability, Refactoring -->
+    <PackageReference Include="Roslynator.Analyzers" Version="4.14.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+
+    <!-- Threading: Async/Await Correctness (Project uses async extensively) -->
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.14.15">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+
+    <!-- ErrorProne.NET: Correctness & Bug Finding (Memory leaks, subtle async bugs) -->
+    <PackageReference Include="ErrorProne.NET.CoreAnalyzers" Version="0.8.1-beta.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!--
+    Performance Optimization: Report Analyzer Activity
+    Enable with: dotnet build /bl /p:ReportAnalyzer=true
+  -->
+  <PropertyGroup Condition="'$(ReportAnalyzer)' == 'true'">
+    <ReportAnalyzer>true</ReportAnalyzer>
+  </PropertyGroup>
+</Project>

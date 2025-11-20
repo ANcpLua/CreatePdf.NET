@@ -1,6 +1,4 @@
 using System.Buffers;
-using AwesomeAssertions;
-using AwesomeAssertions.Execution;
 using CreatePdf.NET.Internal;
 
 namespace CreatePdf.NET.Tests;
@@ -34,7 +32,7 @@ public class BitmapImageTests
         using var image = BitmapImage.FromBitmap(bitmap, 1, 1, similarForeground, similarBackground);
 
         image.GetPixelMemory().ToArray()
-            .Should().Equal(0, 0, 0);
+            .Should().Equal("\0\0\0"u8.ToArray());
     }
 
     [Fact]
@@ -69,13 +67,7 @@ public class BitmapImageTests
 
         using var image = BitmapImage.FromBitmap(bitmap, 2, 2, Dye.Red, background);
 
-        var expectedGreenPixels = new byte[]
-        {
-            0, 255, 0,
-            0, 255, 0,
-            0, 255, 0,
-            0, 255, 0
-        };
+        var expectedGreenPixels = new byte[] { 0, 255, 0, 0, 255, 0, 0, 255, 0, 0, 255, 0 };
 
         image.GetPixelMemory().ToArray()
             .Should().Equal(expectedGreenPixels);

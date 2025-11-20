@@ -1,5 +1,4 @@
-using AwesomeAssertions;
-using AwesomeAssertions.Execution;
+using System.Globalization;
 using CreatePdf.NET.Internal;
 
 namespace CreatePdf.NET.Tests;
@@ -85,7 +84,7 @@ public class PageTests
         var content = page.GetContent();
 
         const float expectedY = Layout.PageHeight - 200 - 12;
-        content.Should().Contain($"100.00 {expectedY:F2} Td");
+        content.Should().Contain(string.Create(CultureInfo.InvariantCulture, $"100.00 {expectedY:F2} Td"));
     }
 
     [Fact]
@@ -155,7 +154,8 @@ public class PageTests
         var content = page.GetContent();
 
         const float expectedY = Layout.PageHeight - 100 - 150;
-        content.Should().Contain($"q 200.00 0 0 150.00 50.00 {expectedY:F2} cm");
+        content.Should()
+            .Contain(string.Create(CultureInfo.InvariantCulture, $"q 200.00 0 0 150.00 50.00 {expectedY:F2} cm"));
     }
 
     [Theory]
@@ -293,10 +293,10 @@ public class PageTests
     public void GetContent_SanitizesNonLatin1Characters(string input, string expected)
     {
         var page = new Page(1, Dye.White);
-    
+
         page.AddText(input, 100, 100, 12, Dye.Black);
         var content = page.GetContent();
-    
+
         content.Should().Contain($"({expected})");
     }
 

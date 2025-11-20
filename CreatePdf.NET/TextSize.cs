@@ -3,9 +3,9 @@ using System.Diagnostics.CodeAnalysis;
 namespace CreatePdf.NET;
 
 /// <summary>
-/// Defines standard text sizes for PDF documents.
+///     Defines standard text sizes for PDF documents.
 /// </summary>
-[ExcludeFromCodeCoverage]
+[ExcludeFromCodeCoverage(Justification = "Data record")]
 public readonly record struct TextSize(int Value)
 {
     /// <summary>Small text (12pt).</summary>

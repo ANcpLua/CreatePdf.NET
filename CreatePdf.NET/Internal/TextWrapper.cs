@@ -39,7 +39,8 @@ internal static class TextWrapper
             while (cut > 0 && !char.IsWhiteSpace(span[cut - 1]))
                 cut--;
 
-            if (cut == 0) cut = max;
+            if (cut == 0)
+                cut = max;
 
             lines.Add(span[..cut].TrimEnd().ToString());
             span = span[cut..].TrimStart();
@@ -56,8 +57,6 @@ internal static class TextWrapper
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float Measure(ReadOnlySpan<char> text, float fontSize)
-    {
-        return text.Length * HelveticaAvgWidth * fontSize * 0.001f;
-    }
+    internal static float Measure(ReadOnlySpan<char> text, float fontSize) =>
+        text.Length * HelveticaAvgWidth * fontSize * 0.001f;
 }

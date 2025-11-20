@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 
 namespace CreatePdf.NET.Internal;
@@ -12,8 +13,10 @@ internal sealed class Page
     {
         Id = id;
         _background = background;
-        _content.AppendLine($"{background.R:F6} {background.G:F6} {background.B:F6} rg");
-        _content.AppendLine($"0 0 {Layout.PageWidth:F2} {Layout.PageHeight:F2} re f");
+        _content.AppendLine(string.Create(CultureInfo.InvariantCulture,
+            $"{background.R:F6} {background.G:F6} {background.B:F6} rg"));
+        _content.AppendLine(string.Create(CultureInfo.InvariantCulture,
+            $"0 0 {Layout.PageWidth:F2} {Layout.PageHeight:F2} re f"));
     }
 
     public int Id { get; }
@@ -28,49 +31,46 @@ internal sealed class Page
         if (dye.IsSimilarTo(_background))
             dye = _background.IsLight ? Dye.Black : Dye.White;
 
-        _content.AppendLine(
-            $"q BT /Helvetica {size:F2} Tf {dye.R:F6} {dye.G:F6} {dye.B:F6} rg {x:F2} {pdfY:F2} Td ({escaped}) Tj ET Q");
+        _content.AppendLine(string.Create(CultureInfo.InvariantCulture,
+            $"q BT /Helvetica {size:F2} Tf {dye.R:F6} {dye.G:F6} {dye.B:F6} rg {x:F2} {pdfY:F2} Td ({escaped}) Tj ET Q"));
     }
 
     public void AddImage(ImageResource image, float x, float y, float width, float height)
     {
         _imageIds.Add(image.Id);
-        _content.AppendLine(
-            $"q {width:F2} 0 0 {height:F2} {x:F2} {Layout.PageHeight - y - height:F2} cm /Im{image.Id} Do Q");
+        _content.AppendLine(string.Create(CultureInfo.InvariantCulture,
+            $"q {width:F2} 0 0 {height:F2} {x:F2} {Layout.PageHeight - y - height:F2} cm /Im{image.Id} Do Q"));
     }
 
-    public string GetContent()
-    {
-        return SanitizeForLatin1(_content.ToString());
-    }
+    public string GetContent() => SanitizeForLatin1(_content.ToString());
 
     private static string SanitizeForLatin1(string text)
     {
         return text
-            .Replace("€", "EUR")
-            .Replace("—", "-")
-            .Replace("–", "-")
+            .Replace("€", "EUR", StringComparison.Ordinal)
+            .Replace("—", "-", StringComparison.Ordinal)
+            .Replace("–", "-", StringComparison.Ordinal)
             .Replace('\u201C', '"')
             .Replace('\u201D', '"')
             .Replace('\u2018', '\'')
             .Replace('\u2019', '\'')
-            .Replace("…", "...")
-            .Replace("œ", "oe")
-            .Replace("Œ", "OE")
-            .Replace("→", "->")
-            .Replace("←", "<-")
-            .Replace("↑", "^")
-            .Replace("↓", "v");
+            .Replace("…", "...", StringComparison.Ordinal)
+            .Replace("œ", "oe", StringComparison.Ordinal)
+            .Replace("Œ", "OE", StringComparison.Ordinal)
+            .Replace("→", "->", StringComparison.Ordinal)
+            .Replace("←", "<-", StringComparison.Ordinal)
+            .Replace("↑", "^", StringComparison.Ordinal)
+            .Replace("↓", "v", StringComparison.Ordinal);
     }
 
     private static string EscapePdfString(ReadOnlySpan<char> text)
     {
         return text.ToString()
-            .Replace("\\", @"\\")
-            .Replace("(", "\\(")
-            .Replace(")", "\\)")
-            .Replace("\n", "\\n")
-            .Replace("\r", "\\r")
-            .Replace("\t", "\\t");
+            .Replace("\\", @"\\", StringComparison.Ordinal)
+            .Replace("(", "\\(", StringComparison.Ordinal)
+            .Replace(")", "\\)", StringComparison.Ordinal)
+            .Replace("\n", "\\n", StringComparison.Ordinal)
+            .Replace("\r", "\\r", StringComparison.Ordinal)
+            .Replace("\t", "\\t", StringComparison.Ordinal);
     }
 }

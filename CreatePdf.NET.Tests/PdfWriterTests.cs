@@ -1,7 +1,6 @@
 using System.Buffers;
+using System.Globalization;
 using System.Text;
-using AwesomeAssertions;
-using AwesomeAssertions.Execution;
 using CreatePdf.NET.Internal;
 
 namespace CreatePdf.NET.Tests;
@@ -17,7 +16,7 @@ public class PdfWriterTests
         await using var writer = new PdfWriter(stream, Dye.White);
 
         writer.DrawText("Hello World", 12, Dye.Black, TextAlignment.Left);
-        await writer.FinalizeAsync();
+        await writer.FinalizeAsync().ConfigureAwait(true);
 
         var content = Latin1.GetString(stream.ToArray());
         content.Should().Contain("(Hello World)");
@@ -30,7 +29,7 @@ public class PdfWriterTests
         await using var writer = new PdfWriter(stream, Dye.White);
 
         writer.DrawText("Text (with parens)", 12, Dye.Black, TextAlignment.Left);
-        await writer.FinalizeAsync();
+        await writer.FinalizeAsync().ConfigureAwait(true);
 
         var content = Latin1.GetString(stream.ToArray());
         content.Should().Contain(@"(Text \(with parens\))");
@@ -41,14 +40,14 @@ public class PdfWriterTests
     {
         using var stream = new MemoryStream();
         await using var writer = new PdfWriter(stream, Dye.White);
-        var longText = string.Join(" ", Enumerable.Repeat("word", 50));
+        var longText = string.Join(' ', Enumerable.Repeat("word", 50));
 
         writer.DrawText(longText, 12, Dye.Black, TextAlignment.Left);
-        await writer.FinalizeAsync();
+        await writer.FinalizeAsync().ConfigureAwait(true);
 
         var content = Latin1.GetString(stream.ToArray());
 
-        content.Split("(word").Length.Should().BeGreaterThan(2);
+        content.Split(["(word"], StringSplitOptions.None).Length.Should().BeGreaterThan(2);
     }
 
     [Fact]
@@ -57,12 +56,12 @@ public class PdfWriterTests
         using var stream = new MemoryStream();
         await using var writer = new PdfWriter(stream, Dye.White);
 
-        for (var i = 0; i < 100; i++) writer.DrawText($"Line {i}", 12, Dye.Black, TextAlignment.Left);
+        for (var i = 0; i < 100; i++) writer.DrawText($"Line {i.ToString(CultureInfo.InvariantCulture)}", 12, Dye.Black, TextAlignment.Left);
 
-        await writer.FinalizeAsync();
+        await writer.FinalizeAsync().ConfigureAwait(true);
 
         var content = Latin1.GetString(stream.ToArray());
-        content.Split("/Type /Page").Length.Should().BeGreaterThan(2);
+        content.Split(["/Type /Page"], StringSplitOptions.None).Length.Should().BeGreaterThan(2);
     }
 
     [Fact]
@@ -72,7 +71,7 @@ public class PdfWriterTests
         await using var writer = new PdfWriter(stream, Dye.White);
 
         writer.DrawText("Left", 12, Dye.Black, TextAlignment.Left);
-        await writer.FinalizeAsync();
+        await writer.FinalizeAsync().ConfigureAwait(true);
 
         var content = Latin1.GetString(stream.ToArray());
         content.Should().Contain("(Left)")
@@ -86,7 +85,7 @@ public class PdfWriterTests
         await using var writer = new PdfWriter(stream, Dye.White);
 
         writer.DrawText("Center", 12, Dye.Black, TextAlignment.Center);
-        await writer.FinalizeAsync();
+        await writer.FinalizeAsync().ConfigureAwait(true);
 
         var content = Latin1.GetString(stream.ToArray());
         content.Should().Contain("(Center)")
@@ -100,7 +99,7 @@ public class PdfWriterTests
         await using var writer = new PdfWriter(stream, Dye.White);
 
         writer.DrawText("Right", 12, Dye.Black, TextAlignment.Right);
-        await writer.FinalizeAsync();
+        await writer.FinalizeAsync().ConfigureAwait(true);
 
         var content = Latin1.GetString(stream.ToArray());
         content.Should().Contain("(Right)")
@@ -114,7 +113,7 @@ public class PdfWriterTests
         await using var writer = new PdfWriter(stream, Dye.White);
 
         writer.DrawBitmapText("TEST", Dye.Black, Dye.White, 2);
-        await writer.FinalizeAsync();
+        await writer.FinalizeAsync().ConfigureAwait(true);
 
         var content = Latin1.GetString(stream.ToArray());
         content.Should().Contain("/Type /XObject")
@@ -129,7 +128,7 @@ public class PdfWriterTests
         await using var writer = new PdfWriter(stream, Dye.White);
 
         writer.DrawBitmapText("Line1\nLine2", Dye.Red, Dye.Blue, 1);
-        await writer.FinalizeAsync();
+        await writer.FinalizeAsync().ConfigureAwait(true);
 
         var content = Latin1.GetString(stream.ToArray());
 
@@ -145,11 +144,11 @@ public class PdfWriterTests
         var longText = new string('A', 200);
 
         writer.DrawBitmapText(longText, Dye.Black, Dye.White, 1);
-        await writer.FinalizeAsync();
+        await writer.FinalizeAsync().ConfigureAwait(true);
 
         var content = Latin1.GetString(stream.ToArray());
 
-        content.Split("/Type /XObject").Length.Should().BeGreaterThan(2);
+        content.Split(["/Type /XObject"], StringSplitOptions.None).Length.Should().BeGreaterThan(2);
     }
 
     [Fact]
@@ -160,7 +159,7 @@ public class PdfWriterTests
         using var image = new BitmapImage(100, 50, MemoryPool<byte>.Shared.Rent(15000));
 
         writer.DrawImage(image);
-        await writer.FinalizeAsync();
+        await writer.FinalizeAsync().ConfigureAwait(true);
 
         var content = Latin1.GetString(stream.ToArray());
         content.Should().Contain("/Type /XObject")
@@ -176,7 +175,7 @@ public class PdfWriterTests
         await using var writer = new PdfWriter(stream, Dye.White);
 
         writer.DrawBitmapText("Line1\n\nLine3", Dye.Black, Dye.White, 1);
-        await writer.FinalizeAsync();
+        await writer.FinalizeAsync().ConfigureAwait(true);
 
         var content = Latin1.GetString(stream.ToArray());
 
@@ -191,15 +190,15 @@ public class PdfWriterTests
         using var stream = new MemoryStream();
         await using var writer = new PdfWriter(stream, Dye.White);
 
-        for (var i = 0; i < 41; i++) writer.DrawText($"Line {i}", 12, Dye.Black, TextAlignment.Left);
+        for (var i = 0; i < 41; i++) writer.DrawText($"Line {i.ToString(CultureInfo.InvariantCulture)}", 12, Dye.Black, TextAlignment.Left);
 
         using var image = new BitmapImage(200, 200, MemoryPool<byte>.Shared.Rent(120000));
 
         writer.DrawImage(image);
-        await writer.FinalizeAsync();
+        await writer.FinalizeAsync().ConfigureAwait(true);
 
         var content = Latin1.GetString(stream.ToArray());
-        content.Split("/Type /Page").Length.Should().BeGreaterThan(2);
+        content.Split(["/Type /Page"], StringSplitOptions.None).Length.Should().BeGreaterThan(2);
     }
 
     [Fact]
@@ -208,7 +207,7 @@ public class PdfWriterTests
         using var stream = new MemoryStream();
         await using var writer = new PdfWriter(stream, Dye.Gray);
 
-        await writer.FinalizeAsync();
+        await writer.FinalizeAsync().ConfigureAwait(true);
 
         var pdf = stream.ToArray();
         var content = Latin1.GetString(pdf);
@@ -234,7 +233,7 @@ public class PdfWriterTests
         using var stream = new MemoryStream();
         await using var writer = new PdfWriter(stream, Dye.Red);
 
-        await writer.FinalizeAsync();
+        await writer.FinalizeAsync().ConfigureAwait(true);
 
         var content = Latin1.GetString(stream.ToArray());
         content.Should().Contain("1.000000 0.000000 0.000000 rg");
@@ -250,12 +249,12 @@ public class PdfWriterTests
         writer.DrawText("Before Image", 12, Dye.Black, TextAlignment.Center);
         writer.DrawImage(image);
         writer.DrawText("After Image", 12, Dye.Black, TextAlignment.Center);
-        await writer.FinalizeAsync();
+        await writer.FinalizeAsync().ConfigureAwait(true);
 
         var content = Latin1.GetString(stream.ToArray());
-        var beforeIndex = content.IndexOf("(Before Image)", StringComparison.Ordinal);
+        var beforeIndex = content.IndexOf("Before Image", StringComparison.Ordinal);
         var imageIndex = content.IndexOf("/Im", StringComparison.Ordinal);
-        var afterIndex = content.IndexOf("(After Image)", StringComparison.Ordinal);
+        var afterIndex = content.IndexOf("After Image", StringComparison.Ordinal);
 
         using (new AssertionScope())
         {
@@ -274,7 +273,7 @@ public class PdfWriterTests
         await using var writer = new PdfWriter(stream, Dye.White);
 
         writer.DrawText("Test", 12, Dye.Black, TextAlignment.Left);
-        await writer.FinalizeAsync();
+        await writer.FinalizeAsync().ConfigureAwait(true);
 
         var content = Latin1.GetString(stream.ToArray());
         content.Should().MatchRegex(@"xref\n0 \d+\n0000000000 65535 f ");
@@ -289,33 +288,33 @@ public class PdfWriterTests
 
         for (var i = 0; i < 3; i++)
         {
-            for (var j = 0; j < 50; j++) writer.DrawText($"Page {i + 1} Line {j}", 12, Dye.Black, TextAlignment.Left);
+            for (var j = 0; j < 50; j++) writer.DrawText($"Page {(i + 1).ToString(CultureInfo.InvariantCulture)} Line {j.ToString(CultureInfo.InvariantCulture)}", 12, Dye.Black, TextAlignment.Left);
 
-            writer.DrawBitmapText($"PAGE{i + 1}", Dye.Black, Dye.White, 1);
+            writer.DrawBitmapText($"PAGE{(i + 1).ToString(CultureInfo.InvariantCulture)}", Dye.Black, Dye.White, 1);
         }
 
-        await writer.FinalizeAsync();
+        await writer.FinalizeAsync().ConfigureAwait(true);
 
         var content = Latin1.GetString(stream.ToArray());
 
-        content.Split("/Type /Page ").Length.Should().BeGreaterThan(2);
+        content.Split(["/Type /Page "], StringSplitOptions.None).Length.Should().BeGreaterThan(2);
 
-        content.Split("/XObject <<").Length.Should().BeGreaterThan(2);
+        content.Split(["/XObject <<"], StringSplitOptions.None).Length.Should().BeGreaterThan(2);
     }
 
     [Fact]
     public async Task DisposeAsync_CanBeCalledMultipleTimes()
     {
         using var stream = new MemoryStream();
-        var writer = new PdfWriter(stream, Dye.White);
+        await using var writer = new PdfWriter(stream, Dye.White);
 
         var act = async () =>
         {
-            await writer.DisposeAsync();
-            await writer.DisposeAsync();
+            await writer.DisposeAsync().ConfigureAwait(true);
+            await writer.DisposeAsync().ConfigureAwait(true);
         };
 
-        await act.Should().NotThrowAsync();
+        await act.Should().NotThrowAsync().ConfigureAwait(true);
     }
 
     [Fact]
@@ -325,7 +324,7 @@ public class PdfWriterTests
         await using var writer = new PdfWriter(stream, Dye.White);
 
         writer.DrawText("Café © résumé", 12, Dye.Black, TextAlignment.Left);
-        await writer.FinalizeAsync();
+        await writer.FinalizeAsync().ConfigureAwait(true);
 
         var content = Latin1.GetString(stream.ToArray());
         content.Should().Contain("(Caf");
@@ -338,7 +337,7 @@ public class PdfWriterTests
         using var stream = new MemoryStream();
         await using var writer = new PdfWriter(stream, Dye.White);
 
-        await writer.FinalizeAsync();
+        await writer.FinalizeAsync().ConfigureAwait(true);
 
         var content = Latin1.GetString(stream.ToArray());
         content.Should().Contain("/MediaBox [0 0 595.00 842.00]");

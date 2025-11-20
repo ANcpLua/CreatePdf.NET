@@ -1,6 +1,3 @@
-using AwesomeAssertions;
-using AwesomeAssertions.Execution;
-
 namespace CreatePdf.NET.Tests;
 
 public class DyeTests

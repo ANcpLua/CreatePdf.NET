@@ -1,35 +1,36 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <IsPackable>false</IsPackable>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
 
-    <ItemGroup>
-        <PackageReference Include="AwesomeAssertions" Version="9.0.0" />
-        <PackageReference Include="AwesomeAssertions.Analyzers" Version="9.0.0">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="coverlet.collector" Version="6.0.4"/>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0"/>
-        <PackageReference Include="xunit" Version="2.9.2"/>
-        <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2"/>
-    </ItemGroup>
+    <!-- Test-specific suppressions (only rules that are truly test-specific) -->
+    <!-- IDE0058: Expression value never used - tests call methods for side effects -->
+    <!-- MA0032: CancellationToken - not all test scenarios need cancellation -->
+    <!-- MA0048: File name matching - test helpers can share files -->
+    <NoWarn>IDE0058;MA0032;MA0048</NoWarn>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <Using Include="Xunit"/>
-    </ItemGroup>
+  <ItemGroup>
+    <!-- Test Framework -->
+    <PackageReference Include="xunit" Version="2.9.3"/>
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5"/>
+    <PackageReference Include="xunit.analyzers" Version="1.18.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
 
-    <ItemGroup>
-      <ProjectReference Include="..\CreatePdf.NET\CreatePdf.NET.csproj" />
-    </ItemGroup>
+    <!-- Test Utilities -->
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1"/>
+    <PackageReference Include="AwesomeAssertions" Version="9.3.0"/>
+    <PackageReference Include="NSubstitute" Version="5.3.0"/>
+    <PackageReference Include="coverlet.collector" Version="6.0.4"/>
+  </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="ocr\" />
-      <Folder Include="output\" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CreatePdf.NET\CreatePdf.NET.csproj"/>
+  </ItemGroup>
 
 </Project>

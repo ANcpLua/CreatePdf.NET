@@ -1,15 +1,14 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace CreatePdf.NET.Internal;
 
 internal static partial class FileOperations
 {
-    [GeneratedRegex(@"[""<>|:*?\x00-\x1F/\\]")]
+    [GeneratedRegex(@"[""<>|:*?\x00-\x1F/\\]", RegexOptions.CultureInvariant, 500)]
     private static partial Regex InvalidCharsRegex();
-
-    private static readonly TimeProvider TimeProvider = TimeProvider.System;
 
     public static string GetOutputPath(string? userInput)
     {
@@ -46,38 +45,57 @@ internal static partial class FileOperations
 
         var fileName = Path.GetFileName(input);
 
-        var sanitized = InvalidCharsRegex().Replace(fileName, "_").Trim().Trim('_', '.');
+        var sanitized = InvalidCharsRegex().Replace(fileName, "_").Trim(' ', '_', '.');
 
         return string.IsNullOrWhiteSpace(sanitized)
             ? GenerateTimestampedFileName()
             : Path.ChangeExtension(sanitized, ".pdf");
     }
 
-    private static string GenerateTimestampedFileName() =>
-        $"document_{TimeProvider.GetUtcNow().ToUnixTimeMilliseconds()}.pdf";
+    private static string GenerateTimestampedFileName() => string.Create(CultureInfo.InvariantCulture,
+        $"document_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}.pdf");
 
-    [ExcludeFromCodeCoverage]
+    [ExcludeFromCodeCoverage(Justification = "Interacts with OS shell")]
     public static void Open(string path)
     {
-        Process.Start(new ProcessStartInfo
+        try
         {
-            FileName = OperatingSystem.IsWindows() ? "cmd" : OperatingSystem.IsMacOS() ? "open" : "xdg-open",
-            Arguments = OperatingSystem.IsWindows() ? $"/c start \"\" \"{path}\"" : path,
-            UseShellExecute = true,
-            CreateNoWindow = true
-        });
+            _ = Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+        }
+#pragma warning disable RCS1075 // Avoid empty catch clause that catches System.Exception
+#pragma warning disable ERP022 // An exit point '}' swallows an unobserved exception
+        catch (Exception)
+        {
+            // Best-effort: Silently ignore if opening fails (missing file association, permission denied, etc.)
+        }
+#pragma warning restore ERP022 // An exit point '}' swallows an unobserved exception
+#pragma warning restore RCS1075 // Avoid empty catch clause that catches System.Exception
     }
 
-    [ExcludeFromCodeCoverage]
+    [ExcludeFromCodeCoverage(Justification = "Interacts with OS shell")]
     public static void ShowDirectory(string path)
     {
-        Process.Start(new ProcessStartInfo
+        try
         {
-            FileName = OperatingSystem.IsWindows() ? "explorer" : OperatingSystem.IsMacOS() ? "open" : "xdg-open",
-            Arguments = OperatingSystem.IsWindows() ? $"/select,\"{path}\"" :
-                OperatingSystem.IsMacOS() ? $"-R {path}" : Path.GetDirectoryName(path)!,
-            UseShellExecute = true,
-            CreateNoWindow = true
-        });
+            var (fileName, arguments) = true switch
+            {
+                _ when OperatingSystem.IsWindows() => ("explorer", $"/select,\"{path}\""),
+                _ when OperatingSystem.IsMacOS() => ("open", $"-R \"{path}\""),
+                _ => ("xdg-open", $"\"{Path.GetDirectoryName(path) ?? path}\"")
+            };
+
+            _ = Process.Start(new ProcessStartInfo
+            {
+                FileName = fileName, Arguments = arguments, UseShellExecute = true, CreateNoWindow = true
+            });
+        }
+#pragma warning disable RCS1075 // Avoid empty catch clause that catches System.Exception
+#pragma warning disable ERP022 // An exit point '}' swallows an unobserved exception
+        catch (Exception)
+        {
+            // Best-effort: Silently ignore if showing directory fails
+        }
+#pragma warning restore ERP022 // An exit point '}' swallows an unobserved exception
+#pragma warning restore RCS1075 // Avoid empty catch clause that catches System.Exception
     }
 }

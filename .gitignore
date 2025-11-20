@@ -149,3 +149,15 @@ TestResult.xml
 nunit-*.xml
 
 ocr/
+
+# Test outputs
+CreatePdf.NET.Tests/output/
+test_output.txt
+build-output.txt
+
+# Coverage results
+coverage-results/
+coverage-check/
+
+# Temporary files
+temp/

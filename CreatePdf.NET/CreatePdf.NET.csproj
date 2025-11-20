@@ -1,31 +1,44 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
-        <LangVersion>preview</LangVersion>
-        <Nullable>enable</Nullable>
-        <ImplicitUsings>enable</ImplicitUsings>
+  <PropertyGroup>
+    <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
+    <LangVersion>14</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
 
-        <PackageId>CreatePdf.NET</PackageId>
-        <Version>2.0.1</Version>
-        <Authors>Alexander Nachtmann</Authors>
-        <Description>A simple, .NET library for PDF creation with text and bitmap rendering, plus optional OCR functionality for text extraction.</Description>
-        <PackageTags>pdf;document;generation;lightweight;net10;preview;ocr</PackageTags>
-        <RepositoryUrl>https://github.com/ANcpLua/CreatePdf.NET</RepositoryUrl>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageProjectUrl>https://github.com/ANcpLua/CreatePdf.NET</PackageProjectUrl>
+    <PackageId>CreatePdf.NET</PackageId>
+    <Version>3.0.0</Version>
+    <Authors>Alexander Nachtmann</Authors>
+    <Description>A simple, .NET library for PDF creation with text and bitmap rendering, plus optional OCR functionality for text extraction.</Description>
+    <PackageTags>pdf;document;generation;lightweight;net10;ocr</PackageTags>
+    <RepositoryUrl>https://github.com/ANcpLua/CreatePdf.NET</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/ANcpLua/CreatePdf.NET</PackageProjectUrl>
 
-        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-        <IncludeSymbols>true</IncludeSymbols>
-        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-        <DebugType>portable</DebugType>
-    </PropertyGroup>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Suppressed rules (intentional decisions, documented in .editorconfig) -->
+    <!-- MA0009: UTC Time - project uses local time intentionally -->
+    <!-- MA0048: File name matching - legacy structure -->
+    <!-- MA0004/VSTHRD111: ConfigureAwait - conflicts with test patterns -->
+    <!-- MA0089: Char overload - readability over micro-optimization -->
+    <!-- CA1305/MA0011: IFormatProvider - internal use, no globalization -->
+    <!-- VSTHRD200: Async naming - legacy compatibility -->
+    <!-- MA0032: CancellationToken - not all APIs support it -->
+    <!-- MA0053: Seal classes - API design (extensibility) -->
+    <!-- MA0008: StructLayout - not critical -->
+    <!-- MA0154: XML langword - documentation style -->
+    <NoWarn>MA0009;MA0048;MA0004;VSTHRD111;MA0089;CA1305;MA0011;VSTHRD200;MA0032;MA0053;MA0008;MA0154</NoWarn>
 
-    <ItemGroup>
-        <None Include="..\README.md" Pack="true" PackagePath="\" />
-    </ItemGroup>
+    <!-- CA2000 (Dispose) and MA0076 (Culture ToString) are ENABLED - high-impact quality rules -->
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DebugType>portable</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\"/>
+  </ItemGroup>
 
 </Project>

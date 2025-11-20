@@ -18,10 +18,7 @@ internal sealed class BitmapImage : IDisposable
     public int Height { get; }
     public int Size { get; }
 
-    public void Dispose()
-    {
-        _memory.Dispose();
-    }
+    public void Dispose() => _memory.Dispose();
 
     public static BitmapImage FromBitmap(bool[] bitmap, int width, int height, Dye fg, Dye bg)
     {
@@ -32,15 +29,13 @@ internal sealed class BitmapImage : IDisposable
         if (fg.IsSimilarTo(bg))
             fg = bg.IsLight ? Dye.Black : Dye.White;
 
-        var bgBytes = new[] { 
-            (byte)Math.Round(bg.R * 255), 
-            (byte)Math.Round(bg.G * 255), 
-            (byte)Math.Round(bg.B * 255) 
+        var bgBytes = new[]
+        {
+            (byte)Math.Round(bg.R * 255), (byte)Math.Round(bg.G * 255), (byte)Math.Round(bg.B * 255)
         };
-        var fgBytes = new[] { 
-            (byte)Math.Round(fg.R * 255), 
-            (byte)Math.Round(fg.G * 255), 
-            (byte)Math.Round(fg.B * 255) 
+        var fgBytes = new[]
+        {
+            (byte)Math.Round(fg.R * 255), (byte)Math.Round(fg.G * 255), (byte)Math.Round(fg.B * 255)
         };
 
         for (var i = 0; i < size; i += 3)
@@ -53,8 +48,5 @@ internal sealed class BitmapImage : IDisposable
         return new BitmapImage(width, height, memory);
     }
 
-    public ReadOnlyMemory<byte> GetPixelMemory()
-    {
-        return _memory.Memory[..Size];
-    }
+    public ReadOnlyMemory<byte> GetPixelMemory() => _memory.Memory[..Size];
 }

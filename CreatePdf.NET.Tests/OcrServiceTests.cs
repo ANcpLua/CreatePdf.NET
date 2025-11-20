@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using CreatePdf.NET.Internal;
 
 namespace CreatePdf.NET.Tests;
@@ -12,7 +11,8 @@ public class OcrServiceTests
     {
         var ocrResult = await Pdf.Create()
             .AddText("Hello World")
-            .SaveAndOcr("AddText_HelloWorld");
+            .SaveAndOcrWithLoggingAsync("AddText_HelloWorld")
+            .ConfigureAwait(true);
 
         ocrResult.Should().NotBeNullOrWhiteSpace()
             .And.Contain("Hello World", "OCR should accurately read the text from the PDF");
@@ -23,7 +23,8 @@ public class OcrServiceTests
     {
         var ocrResult = await Pdf.Create()
             .AddPixelText("Hello World", Dye.Blue, Dye.White, PixelTextSize.Large)
-            .SaveAndOcr("AddPixelText_HelloWorld");
+            .SaveAndOcrWithLoggingAsync("AddPixelText_HelloWorld")
+            .ConfigureAwait(true);
 
         ocrResult.Should().NotBeNullOrWhiteSpace()
             .And.Contain("Hello World", "OCR should accurately read bitmap text from the PDF");
@@ -36,28 +37,32 @@ public class OcrServiceTests
             .AddText("Stream Test Content")
             .AddLine()
             .AddText("This PDF was loaded from a stream")
-            .SaveAsync("stream_test.pdf");
+            .SaveAsync("stream_test.pdf")
+            .ConfigureAwait(true);
 
-        var pdfBytes = await File.ReadAllBytesAsync(pdfPath);
+        var pdfBytes = await File.ReadAllBytesAsync(pdfPath).ConfigureAwait(true);
         using var stream = new MemoryStream(pdfBytes);
 
-        var extractedText = await Pdf.Load(stream).OcrAsync();
+        var extractedText =
+            await Pdf.Load(stream).OcrAsync(cancellationToken: CancellationToken.None).ConfigureAwait(true);
 
         extractedText.Should().NotBeNullOrWhiteSpace()
             .And.Contain("Stream Test Content")
             .And.Contain("This PDF was loaded from a stream");
     }
 
-    [Fact] 
+    [Fact]
     public async Task ProcessPdfStreamAsync_HandlesCleanupErrorsGracefully()
     {
         var pdfBytes = await File.ReadAllBytesAsync(await Pdf.Create()
-            .AddText("Exception Test")
-            .SaveAsync());
+                .AddText("Exception Test")
+                .SaveAsync()
+                .ConfigureAwait(true))
+            .ConfigureAwait(true);
 
         using var stream = new MemoryStream(pdfBytes);
-        
-        await Pdf.Load(stream).OcrAsync();
+
+        await Pdf.Load(stream).OcrAsync(cancellationToken: CancellationToken.None).ConfigureAwait(true);
     }
 
     [Fact]
@@ -75,7 +80,7 @@ public class OcrServiceTests
     public void TryDeleteFile_NonExistentFile_DoesNotThrow()
     {
         var nonExistentFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-        
+
         var act = () => OcrService.TryDeleteFile(nonExistentFile);
         act.Should().NotThrow();
     }

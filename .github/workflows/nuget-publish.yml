@@ -22,6 +22,39 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Optimize package icon
+        run: |
+          python3 << 'EOF'
+          from PIL import Image
+          import os
+
+          icon_path = 'icon.png'
+          if os.path.exists(icon_path):
+              print(f"Processing {icon_path}...")
+              img = Image.open(icon_path)
+
+              # Trim transparent borders
+              bbox = img.getbbox()
+              if bbox:
+                  img = img.crop(bbox)
+                  print(f"Trimmed to: {img.size}")
+
+              # Resize maintaining aspect ratio
+              img.thumbnail((512, 512), Image.Resampling.LANCZOS)
+              print(f"Resized to: {img.size}")
+
+              # Center on 512x512 canvas with transparent background
+              new_img = Image.new('RGBA', (512, 512), (0, 0, 0, 0))
+              offset = ((512 - img.width) // 2, (512 - img.height) // 2)
+              new_img.paste(img, offset)
+
+              # Save optimized
+              new_img.save(icon_path, 'PNG', optimize=True)
+              print(f"Saved optimized icon: {os.path.getsize(icon_path)} bytes")
+          else:
+              print(f"Icon not found at {icon_path}, skipping optimization")
+          EOF
+
       - name: Setup .NET SDKs
         uses: actions/setup-dotnet@v4
         with:

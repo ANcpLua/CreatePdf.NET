@@ -1,5 +1,5 @@
 [![codecov](https://codecov.io/gh/ANcpLua/CreatePdf.NET/branch/main/graph/badge.svg?token=lgxIXBnFrn)](https://codecov.io/gh/ANcpLua/CreatePdf.NET)
-[![.NET](https://img.shields.io/badge/.NET-10.0%20|%209.0%20|%208.0-512BD4)](https://dotnet.microsoft.com/)
+[![.NET 10](https://img.shields.io/badge/.NET-10.0-7C3AED)](https://dotnet.microsoft.com/download/dotnet/10.0)[![.NET 9](https://img.shields.io/badge/-9.0-6366F1)](https://dotnet.microsoft.com/download/dotnet/9.0)[![.NET 8](https://img.shields.io/badge/-8.0-512BD4)](https://dotnet.microsoft.com/download/dotnet/8.0)
 [![NuGet](https://img.shields.io/nuget/v/CreatePdf.NET?label=NuGet&color=0891B2)](https://www.nuget.org/packages/CreatePdf.NET/)
 [![License](https://img.shields.io/github/license/ANcpLua/CreatePdf.NET?label=License&color=white)](https://github.com/ANcpLua/CreatePdf.NET/blob/main/LICENSE)
 [![Docker](https://img.shields.io/docker/v/ancplua/createpdf.net?label=Docker&color=0C4A6E)](https://hub.docker.com/r/ancplua/createpdf.net)

@@ -3,7 +3,7 @@ using CreatePdf.NET.Internal;
 
 namespace CreatePdf.NET.Tests;
 
-public class TesseractOcrEngineTests
+public class TesseractOcrProviderTests
 {
     private const string AppleSiliconPath = "/opt/homebrew/bin/tesseract";
     private const string IntelMacPath = "/usr/local/bin/tesseract";
@@ -13,7 +13,7 @@ public class TesseractOcrEngineTests
     {
         var processRunner = new FakeProcessRunner();
         var environment = new FakeSystemEnvironment { FileExistsImpl = _ => false };
-        var engine = new TesseractOcrEngine(environment, processRunner);
+        var engine = new TesseractOcrProvider(environment, processRunner);
 
         var act = () => engine.ExtractTextFromImageAsync(
             "input.png",
@@ -32,7 +32,7 @@ public class TesseractOcrEngineTests
     [Fact]
     public void GetPdfRasterizerExecutable_UsesExplicitConverterPath()
     {
-        var engine = new TesseractOcrEngine(new FakeSystemEnvironment(), new FakeProcessRunner());
+        var engine = new TesseractOcrProvider(new FakeSystemEnvironment(), new FakeProcessRunner());
         var options = new OcrOptions { PdfConverterPath = "/custom/gs" };
 
         engine.GetPdfRasterizerExecutable(options).Should().Be("/custom/gs");
@@ -41,7 +41,7 @@ public class TesseractOcrEngineTests
     [Fact]
     public void GetPdfRasterizerExecutable_MacOs_ReturnsSips()
     {
-        var engine = new TesseractOcrEngine(new FakeSystemEnvironment { IsMacOS = true }, new FakeProcessRunner());
+        var engine = new TesseractOcrProvider(new FakeSystemEnvironment { IsMacOS = true }, new FakeProcessRunner());
 
         engine.GetPdfRasterizerExecutable(new OcrOptions()).Should().Be("/usr/bin/sips");
     }
@@ -52,7 +52,7 @@ public class TesseractOcrEngineTests
     public void GetPdfRasterizerExecutable_Windows_SelectsBitnessSpecificCommand(bool is64Bit, string expected)
     {
         var environment = new FakeSystemEnvironment { IsWindows = true, Is64BitOperatingSystem = is64Bit };
-        var engine = new TesseractOcrEngine(environment, new FakeProcessRunner());
+        var engine = new TesseractOcrProvider(environment, new FakeProcessRunner());
 
         engine.GetPdfRasterizerExecutable(new OcrOptions()).Should().Be(expected);
     }
@@ -60,7 +60,7 @@ public class TesseractOcrEngineTests
     [Fact]
     public void GetPdfRasterizerExecutable_DefaultsToUnixCommand()
     {
-        var engine = new TesseractOcrEngine(new FakeSystemEnvironment(), new FakeProcessRunner());
+        var engine = new TesseractOcrProvider(new FakeSystemEnvironment(), new FakeProcessRunner());
 
         engine.GetPdfRasterizerExecutable(new OcrOptions()).Should().Be("gs");
     }
@@ -68,7 +68,7 @@ public class TesseractOcrEngineTests
     [Fact]
     public void GetTesseractExecutable_UsesProvidedPath()
     {
-        var engine = new TesseractOcrEngine(new FakeSystemEnvironment(), new FakeProcessRunner());
+        var engine = new TesseractOcrProvider(new FakeSystemEnvironment(), new FakeProcessRunner());
         var options = new OcrOptions { TesseractPath = "/custom/tesseract" };
 
         engine.GetTesseractExecutable(options).Should().Be("/custom/tesseract");
@@ -82,7 +82,7 @@ public class TesseractOcrEngineTests
             IsMacOS = true,
             FileExistsImpl = path => string.Equals(path, AppleSiliconPath, StringComparison.Ordinal)
         };
-        var engine = new TesseractOcrEngine(environment, new FakeProcessRunner());
+        var engine = new TesseractOcrProvider(environment, new FakeProcessRunner());
 
         engine.GetTesseractExecutable(new OcrOptions()).Should().Be(AppleSiliconPath);
     }
@@ -95,7 +95,7 @@ public class TesseractOcrEngineTests
             IsMacOS = true,
             FileExistsImpl = path => string.Equals(path, IntelMacPath, StringComparison.Ordinal)
         };
-        var engine = new TesseractOcrEngine(environment, new FakeProcessRunner());
+        var engine = new TesseractOcrProvider(environment, new FakeProcessRunner());
 
         engine.GetTesseractExecutable(new OcrOptions()).Should().Be(IntelMacPath);
     }
@@ -103,7 +103,7 @@ public class TesseractOcrEngineTests
     [Fact]
     public void GetTesseractExecutable_UsesFallbackWhenNoMacBinaryFound()
     {
-        var engine = new TesseractOcrEngine(
+        var engine = new TesseractOcrProvider(
             new FakeSystemEnvironment { IsMacOS = true },
             new FakeProcessRunner());
 
@@ -113,7 +113,7 @@ public class TesseractOcrEngineTests
     [Fact]
     public void GetRasterizationArguments_MacOs_UsesSipsFormat()
     {
-        var engine = new TesseractOcrEngine(new FakeSystemEnvironment { IsMacOS = true }, new FakeProcessRunner());
+        var engine = new TesseractOcrProvider(new FakeSystemEnvironment { IsMacOS = true }, new FakeProcessRunner());
 
         engine.GetRasterizationArguments("file.pdf", "file.png", new OcrOptions { Dpi = 150 })
             .Should()
@@ -123,7 +123,7 @@ public class TesseractOcrEngineTests
     [Fact]
     public void GetRasterizationArguments_NonMac_UsesGhostscriptFormat()
     {
-        var engine = new TesseractOcrEngine(new FakeSystemEnvironment(), new FakeProcessRunner());
+        var engine = new TesseractOcrProvider(new FakeSystemEnvironment(), new FakeProcessRunner());
 
         engine.GetRasterizationArguments("file.pdf", "file.png", new OcrOptions { Dpi = 200 })
             .Should()

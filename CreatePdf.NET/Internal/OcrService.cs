@@ -2,15 +2,15 @@ namespace CreatePdf.NET.Internal;
 
 internal sealed class OcrService
 {
-    private readonly IPdfOcrEngine _engine;
+    private readonly IOcrProvider _provider;
 
-    public OcrService() : this(new TesseractOcrEngine())
+    public OcrService() : this(new TesseractOcrProvider())
     {
     }
 
-    internal OcrService(IPdfOcrEngine engine)
+    internal OcrService(IOcrProvider provider)
     {
-        _engine = engine;
+        _provider = provider;
     }
 
     public async Task<string> ProcessPdfAsync(string pdfPath, OcrOptions options,
@@ -23,8 +23,8 @@ internal sealed class OcrService
 
         try
         {
-            await _engine.RasterizePdfToPngAsync(pdfPath, pngPath, options, cancellationToken).ConfigureAwait(false);
-            return await _engine.ExtractTextFromImageAsync(pngPath, txtPath, options, cancellationToken)
+            await _provider.RasterizePdfToPngAsync(pdfPath, pngPath, options, cancellationToken).ConfigureAwait(false);
+            return await _provider.ExtractTextFromImageAsync(pngPath, txtPath, options, cancellationToken)
                 .ConfigureAwait(false);
         }
         finally

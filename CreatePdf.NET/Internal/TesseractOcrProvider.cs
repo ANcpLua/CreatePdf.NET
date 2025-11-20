@@ -4,10 +4,10 @@ using System.Globalization;
 namespace CreatePdf.NET.Internal;
 
 /// <summary>
-///     A concrete implementation of <see cref="IPdfOcrEngine" /> that uses external processes (Ghostscript/SIPS and
+///     A concrete implementation of <see cref="IOcrProvider" /> that uses external processes (Ghostscript/SIPS and
 ///     Tesseract) to perform OCR.
 /// </summary>
-internal sealed class TesseractOcrEngine : IPdfOcrEngine
+internal sealed class TesseractOcrProvider : IOcrProvider
 {
     private const string SipsUniversalPath = "/usr/bin/sips";
     private const string TesseractAppleSiliconPath = "/opt/homebrew/bin/tesseract";
@@ -20,12 +20,12 @@ internal sealed class TesseractOcrEngine : IPdfOcrEngine
     private readonly IProcessRunner _processRunner;
     private readonly ISystemEnvironment _systemEnvironment;
 
-    internal TesseractOcrEngine()
+    internal TesseractOcrProvider()
         : this(RuntimeSystemEnvironment.Instance, ProcessRunner.Instance)
     {
     }
 
-    internal TesseractOcrEngine(ISystemEnvironment systemEnvironment, IProcessRunner processRunner)
+    internal TesseractOcrProvider(ISystemEnvironment systemEnvironment, IProcessRunner processRunner)
     {
         ArgumentNullException.ThrowIfNull(systemEnvironment);
         ArgumentNullException.ThrowIfNull(processRunner);

@@ -9,20 +9,20 @@ public class OcrServiceUnitTests
     private const string TestPdfPath = "test.pdf";
     private const string ExpectedText = "Extracted Text Content";
 
-    private readonly IPdfOcrEngine _ocrEngine;
+    private readonly IOcrProvider _ocrProvider;
     private readonly OcrService _sut; // System Under Test
 
     public OcrServiceUnitTests()
     {
-        _ocrEngine = Substitute.For<IPdfOcrEngine>();
-        _sut = new OcrService(_ocrEngine);
+        _ocrProvider = Substitute.For<IOcrProvider>();
+        _sut = new OcrService(_ocrProvider);
     }
 
     [Fact]
     public async Task ProcessPdfAsync_WhenEngineSucceeds_ReturnsExtractedText()
     {
         // Arrange
-        _ocrEngine.ExtractTextFromImageAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<OcrOptions>(),
+        _ocrProvider.ExtractTextFromImageAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<OcrOptions>(),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(ExpectedText));
 
@@ -32,14 +32,14 @@ public class OcrServiceUnitTests
         // Assert
         result.Should().Be(ExpectedText);
 
-        // Verify the engine methods were called in order
-        await _ocrEngine.Received(1).RasterizePdfToPngAsync(
+        // Verify the provider methods were called in order
+        await _ocrProvider.Received(1).RasterizePdfToPngAsync(
             Arg.Is(TestPdfPath),
             Arg.Is<string>(s => s.EndsWith(".png", StringComparison.Ordinal)),
             Arg.Any<OcrOptions>(),
             Arg.Any<CancellationToken>()).ConfigureAwait(true);
 
-        await _ocrEngine.Received(1).ExtractTextFromImageAsync(
+        await _ocrProvider.Received(1).ExtractTextFromImageAsync(
             Arg.Is<string>(s => s.EndsWith(".png", StringComparison.Ordinal)),
             Arg.Is<string>(s => s.EndsWith(".txt", StringComparison.Ordinal)),
             Arg.Any<OcrOptions>(),
@@ -50,7 +50,7 @@ public class OcrServiceUnitTests
     public async Task ProcessPdfAsync_WhenConversionFails_CleansUpFilesAndThrows()
     {
         // Arrange
-        _ocrEngine.RasterizePdfToPngAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<OcrOptions>(),
+        _ocrProvider.RasterizePdfToPngAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<OcrOptions>(),
                 Arg.Any<CancellationToken>())
             .Throws(new InvalidOperationException("Conversion failed"));
 
@@ -62,7 +62,7 @@ public class OcrServiceUnitTests
             .WithMessage("Conversion failed").ConfigureAwait(true);
 
         // Verify OCR was NOT attempted
-        await _ocrEngine.DidNotReceive().ExtractTextFromImageAsync(
+        await _ocrProvider.DidNotReceive().ExtractTextFromImageAsync(
                 Arg.Any<string>(), Arg.Any<string>(), Arg.Any<OcrOptions>(), Arg.Any<CancellationToken>())
             .ConfigureAwait(true);
     }
@@ -73,7 +73,7 @@ public class OcrServiceUnitTests
         // Arrange
         using var stream = new MemoryStream([1, 2, 3]); // Dummy content
 
-        _ocrEngine.ExtractTextFromImageAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<OcrOptions>(),
+        _ocrProvider.ExtractTextFromImageAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<OcrOptions>(),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(ExpectedText));
 
@@ -84,7 +84,7 @@ public class OcrServiceUnitTests
         result.Should().Be(ExpectedText);
 
         // Verify conversion happened with a temp file
-        await _ocrEngine.Received(1).RasterizePdfToPngAsync(
+        await _ocrProvider.Received(1).RasterizePdfToPngAsync(
             Arg.Any<string>(), // The temp file path is random, so just check it was called
             Arg.Any<string>(),
             Arg.Any<OcrOptions>(),

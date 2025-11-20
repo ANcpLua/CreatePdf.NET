@@ -6,14 +6,19 @@
     <ImplicitUsings>enable</ImplicitUsings>
 
     <PackageId>CreatePdf.NET</PackageId>
+    <Title>CreatePdf.NET - Simple PDF Creation Library</Title>
     <Version>3.0.0</Version>
     <Authors>Alexander Nachtmann</Authors>
-    <Description>A simple, .NET library for PDF creation with text and bitmap rendering, plus optional OCR functionality for text extraction.</Description>
-    <PackageTags>pdf;document;generation;lightweight;net10;ocr</PackageTags>
+    <Summary>Lightweight PDF generation library for .NET 10/9/8 with text rendering, bitmap graphics, and OCR</Summary>
+    <Description>CreatePdf.NET is a simple, fast PDF creation library for .NET applications. Generate PDF documents with text rendering, bitmap graphics, and optional OCR text extraction. Lightweight, dependency-free, 100% test coverage. Perfect for creating reports, invoices, receipts, labels, and documents. Supports .NET 10, .NET 9, and .NET 8 with fluent C# API.</Description>
+    <PackageTags>pdf;pdf-generation;pdf-creator;pdf-library;create-pdf;generate-pdf;document;csharp;c#;dotnet;net10;net9;net8;text-rendering;bitmap;graphics;ocr;tesseract;report;invoice;receipt;label;lightweight;simple;fast;fluent-api;dependency-free</PackageTags>
     <RepositoryUrl>https://github.com/ANcpLua/CreatePdf.NET</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>icon.png</PackageIcon>
     <PackageProjectUrl>https://github.com/ANcpLua/CreatePdf.NET</PackageProjectUrl>
+    <Copyright>Copyright © 2025 Alexander Nachtmann</Copyright>
+    <PackageReleaseNotes>https://github.com/ANcpLua/CreatePdf.NET/releases</PackageReleaseNotes>
 
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <IncludeSymbols>true</IncludeSymbols>
@@ -39,6 +44,7 @@
 
   <ItemGroup>
     <None Include="..\README.md" Pack="true" PackagePath="\"/>
+    <None Include="..\icon.png" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
   <ItemGroup>

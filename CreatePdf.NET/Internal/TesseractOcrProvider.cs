@@ -56,7 +56,7 @@ internal sealed class TesseractOcrProvider : IOcrProvider
             Path.GetFileNameWithoutExtension(txtPath));
         var actualTxtPath = outputBase + ".txt";
 
-        await _processRunner.RunAsync(
+        var result = await _processRunner.RunAsync(
                 CreateProcessInfo(
                     GetTesseractExecutable(options),
                     GetOcrArguments(pngPath, outputBase, options)),
@@ -64,7 +64,13 @@ internal sealed class TesseractOcrProvider : IOcrProvider
             .ConfigureAwait(false);
 
         if (!_systemEnvironment.FileExists(actualTxtPath))
-            throw new FileNotFoundException("OCR output file not found. Tesseract execution failed.", actualTxtPath);
+        {
+            var exitCode = result.ExitCode.ToString(CultureInfo.InvariantCulture);
+            var message = string.IsNullOrWhiteSpace(result.StandardError)
+                ? $"OCR output file not found (Tesseract exited with code {exitCode})."
+                : $"OCR output file not found (Tesseract exited with code {exitCode}): {result.StandardError.Trim()}";
+            throw new FileNotFoundException(message, actualTxtPath);
+        }
 
         var text = await File.ReadAllTextAsync(actualTxtPath, cancellationToken).ConfigureAwait(false);
         return text.Trim().Replace("\n", " ").Replace("\r", " ");

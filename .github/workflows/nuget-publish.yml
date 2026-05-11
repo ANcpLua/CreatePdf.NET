@@ -84,6 +84,8 @@ jobs:
       - name: Authenticate with NuGet
         uses: NuGet/login@v1
         if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+        with:
+          user: ANcpLua
 
       - name: Publish packages to NuGet.org
         if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'

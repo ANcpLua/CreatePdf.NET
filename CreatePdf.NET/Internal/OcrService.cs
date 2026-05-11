@@ -64,7 +64,14 @@ internal sealed class OcrService
 
     internal static void TryDeleteDirectory(string path)
     {
-        if (Directory.Exists(path))
-            Directory.Delete(path, recursive: true);
+        try
+        {
+            if (Directory.Exists(path))
+                Directory.Delete(path, recursive: true);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // Best-effort cleanup. Called from finally — must not mask the original exception.
+        }
     }
 }

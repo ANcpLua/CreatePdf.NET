@@ -30,6 +30,39 @@ public class TesseractOcrProviderTests
     }
 
     [Fact]
+    public async Task ExtractTextFromImageAsync_WhenOutputPathHasNonTxtExtension_ChecksDerivedTxtPath()
+    {
+        // Tesseract always appends ".txt" to the base it is given. If the caller hands us
+        // a path like "out.log", the provider must read back "out.txt", not "out.log".
+        var checkedPaths = new List<string>();
+        var processRunner = new FakeProcessRunner();
+        var environment = new FakeSystemEnvironment
+        {
+            FileExistsImpl = path =>
+            {
+                checkedPaths.Add(path);
+                return false;
+            }
+        };
+        var engine = new TesseractOcrProvider(environment, processRunner);
+
+        var tempDir = Path.GetTempPath();
+        var nonTxtPath = Path.Combine(tempDir, "out.log");
+        var expectedDerivedPath = Path.Combine(tempDir, "out.txt");
+
+        var act = () => engine.ExtractTextFromImageAsync(
+            "input.png",
+            nonTxtPath,
+            new OcrOptions { TesseractPath = "/bin/echo" });
+
+        await act.Should().ThrowAsync<FileNotFoundException>()
+            .Where(e => e.FileName == expectedDerivedPath)
+            .ConfigureAwait(true);
+
+        checkedPaths.Should().ContainSingle().Which.Should().Be(expectedDerivedPath);
+    }
+
+    [Fact]
     public void GetPdfRasterizerExecutable_UsesExplicitConverterPath()
     {
         var engine = new TesseractOcrProvider(new FakeSystemEnvironment(), new FakeProcessRunner());

@@ -62,12 +62,12 @@ internal sealed class OcrService
             .ConfigureAwait(false);
     }
 
-    internal static void TryDeleteDirectory(string path)
+    internal static void TryDeleteDirectory(string path, Action<string, bool>? deleteImpl = null)
     {
         try
         {
-            if (Directory.Exists(path))
-                Directory.Delete(path, recursive: true);
+            if (!Directory.Exists(path)) return;
+            (deleteImpl ?? Directory.Delete)(path, true);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {

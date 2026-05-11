@@ -50,8 +50,7 @@ internal sealed class TesseractOcrProvider : IOcrProvider
     public async Task<string> ExtractTextFromImageAsync(string pngPath, string txtPath, OcrOptions options,
         CancellationToken cancellationToken = default)
     {
-        // Tesseract appends ".txt" itself, so strip the extension to give it the base path
-        // and then re-attach .txt for the file we actually read back.
+        // Tesseract appends ".txt" itself, so strip the extension to give it the base path.
         var outputBase = Path.Combine(
             Path.GetDirectoryName(txtPath) ?? string.Empty,
             Path.GetFileNameWithoutExtension(txtPath));

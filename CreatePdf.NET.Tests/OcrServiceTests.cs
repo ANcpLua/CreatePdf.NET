@@ -85,4 +85,40 @@ public class OcrServiceTests
 
         act.Should().NotThrow();
     }
+
+    [Fact]
+    public void TryDeleteDirectory_WhenDeleteThrowsIOException_DoesNotPropagate()
+    {
+        var tempDir = Directory.CreateTempSubdirectory("createpdf-ocr-test-");
+        try
+        {
+            var act = () => OcrService.TryDeleteDirectory(
+                tempDir.FullName,
+                (_, _) => throw new IOException("simulated lock"));
+
+            act.Should().NotThrow();
+        }
+        finally
+        {
+            Directory.Delete(tempDir.FullName, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void TryDeleteDirectory_WhenDeleteThrowsUnauthorizedAccess_DoesNotPropagate()
+    {
+        var tempDir = Directory.CreateTempSubdirectory("createpdf-ocr-test-");
+        try
+        {
+            var act = () => OcrService.TryDeleteDirectory(
+                tempDir.FullName,
+                (_, _) => throw new UnauthorizedAccessException("simulated permission denied"));
+
+            act.Should().NotThrow();
+        }
+        finally
+        {
+            Directory.Delete(tempDir.FullName, recursive: true);
+        }
+    }
 }

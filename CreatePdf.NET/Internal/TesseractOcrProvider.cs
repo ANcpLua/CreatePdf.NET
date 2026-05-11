@@ -72,7 +72,7 @@ internal sealed class TesseractOcrProvider : IOcrProvider
             throw new FileNotFoundException(message, actualTxtPath);
         }
 
-        var text = await File.ReadAllTextAsync(actualTxtPath, cancellationToken).ConfigureAwait(false);
+        var text = await _systemEnvironment.ReadAllTextAsync(actualTxtPath, cancellationToken).ConfigureAwait(false);
         return text.Trim().Replace("\n", " ").Replace("\r", " ");
     }
 

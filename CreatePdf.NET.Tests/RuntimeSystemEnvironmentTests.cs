@@ -31,4 +31,25 @@ public class RuntimeSystemEnvironmentTests
 
         RuntimeSystemEnvironment.Instance.FileExists(temp).Should().BeFalse();
     }
+
+    [Fact]
+    public async Task ReadAllTextAsync_DelegatesToFileSystem()
+    {
+        var tempDir = Directory.CreateTempSubdirectory("createpdf-runtime-read-");
+        try
+        {
+            var path = Path.Combine(tempDir.FullName, "payload.txt");
+            await File.WriteAllTextAsync(path, "hello world").ConfigureAwait(true);
+
+            var text = await RuntimeSystemEnvironment.Instance
+                .ReadAllTextAsync(path, CancellationToken.None)
+                .ConfigureAwait(true);
+
+            text.Should().Be("hello world");
+        }
+        finally
+        {
+            tempDir.Delete(recursive: true);
+        }
+    }
 }

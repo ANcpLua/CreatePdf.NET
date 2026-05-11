@@ -9,4 +9,6 @@ internal interface ISystemEnvironment
     bool Is64BitOperatingSystem { get; }
 
     bool FileExists(string path);
+
+    Task<string> ReadAllTextAsync(string path, CancellationToken cancellationToken);
 }

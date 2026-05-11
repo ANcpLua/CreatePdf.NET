@@ -11,4 +11,7 @@ internal sealed class RuntimeSystemEnvironment : ISystemEnvironment
     public bool Is64BitOperatingSystem => Environment.Is64BitOperatingSystem;
 
     public bool FileExists(string path) => File.Exists(path);
+
+    public Task<string> ReadAllTextAsync(string path, CancellationToken cancellationToken) =>
+        File.ReadAllTextAsync(path, cancellationToken);
 }

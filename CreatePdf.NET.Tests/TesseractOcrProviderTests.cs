@@ -29,6 +29,66 @@ public class TesseractOcrProviderTests
         processRunner.StartInfos[0].Arguments.Should().Contain("input.png");
     }
 
+    [Theory]
+    [InlineData("out.log", "out.txt")]
+    [InlineData("out", "out.txt")]
+    [InlineData("foo.bar.log", "foo.bar.txt")]
+    [InlineData("out.TXT", "out.txt")]
+    [InlineData("out.", "out.txt")]
+    public async Task ExtractTextFromImageAsync_DerivesActualTxtPathFromBase(string inputName, string expectedName)
+    {
+        var tempDir = Path.GetTempPath();
+        var inputPath = Path.Combine(tempDir, inputName);
+        var expectedPath = Path.Combine(tempDir, expectedName);
+        var checkedPaths = new List<string>();
+        var processRunner = new FakeProcessRunner();
+        var environment = new FakeSystemEnvironment
+        {
+            FileExistsImpl = path =>
+            {
+                checkedPaths.Add(path);
+                return false;
+            }
+        };
+        var engine = new TesseractOcrProvider(environment, processRunner);
+
+        var act = () => engine.ExtractTextFromImageAsync(
+            "input.png",
+            inputPath,
+            new OcrOptions { TesseractPath = "/bin/echo" });
+
+        await act.Should().ThrowAsync<FileNotFoundException>()
+            .Where(e => e.FileName == expectedPath)
+            .ConfigureAwait(true);
+
+        checkedPaths.Should().ContainSingle().Which.Should().Be(expectedPath);
+    }
+
+    [Fact]
+    public async Task ExtractTextFromImageAsync_WithNonTxtInputPath_ReadsFromDerivedTxtPath()
+    {
+        var actualTxtPath = Path.Combine(Path.GetTempPath(), $"createpdf-test-{Guid.NewGuid():N}.txt");
+        var nonTxtInputPath = Path.ChangeExtension(actualTxtPath, ".log");
+        await File.WriteAllTextAsync(actualTxtPath, "Hello\nWorld").ConfigureAwait(true);
+        try
+        {
+            var processRunner = new FakeProcessRunner();
+            var environment = new FakeSystemEnvironment { FileExistsImpl = File.Exists };
+            var engine = new TesseractOcrProvider(environment, processRunner);
+
+            var result = await engine.ExtractTextFromImageAsync(
+                "input.png",
+                nonTxtInputPath,
+                new OcrOptions { TesseractPath = "/bin/echo" }).ConfigureAwait(true);
+
+            result.Should().Be("Hello World");
+        }
+        finally
+        {
+            if (File.Exists(actualTxtPath)) File.Delete(actualTxtPath);
+        }
+    }
+
     [Fact]
     public void GetPdfRasterizerExecutable_UsesExplicitConverterPath()
     {

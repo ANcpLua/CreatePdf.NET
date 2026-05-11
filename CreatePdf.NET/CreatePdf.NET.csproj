@@ -7,7 +7,7 @@
 
     <PackageId>CreatePdf.NET</PackageId>
     <Title>CreatePdf.NET - Simple PDF Creation Library</Title>
-    <Version>3.0.3</Version>
+    <Version>3.0.4</Version>
     <Authors>Alexander Nachtmann</Authors>
     <Summary>Lightweight PDF generation library for .NET 10/9/8 with text rendering, bitmap graphics, and OCR</Summary>
     <Description>CreatePdf.NET is a simple, fast PDF creation library for .NET applications. Generate PDF documents with text rendering, bitmap graphics, and optional OCR text extraction. Lightweight, dependency-free, 100% test coverage. Perfect for creating reports, invoices, receipts, labels, and documents. Supports .NET 10, .NET 9, and .NET 8 with fluent C# API.</Description>

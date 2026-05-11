@@ -143,14 +143,20 @@ public class DocumentTests
     {
         var doc = Pdf.Create();
         doc.AddText("Test content");
-        var filename = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.pdf");
+        var tempDir = Directory.CreateTempSubdirectory("createpdf-doc-test-");
+        var filename = Path.Combine(tempDir.FullName, "document.pdf");
 
-        var path = await doc.SaveAsync(filename).ConfigureAwait(true);
+        try
+        {
+            var path = await doc.SaveAsync(filename).ConfigureAwait(true);
 
-        path.Should().EndWith(".pdf");
-        File.Exists(path).Should().BeTrue();
-
-        File.Delete(path);
+            path.Should().EndWith(".pdf");
+            File.Exists(path).Should().BeTrue();
+        }
+        finally
+        {
+            tempDir.Delete(recursive: true);
+        }
     }
 
     [Fact]

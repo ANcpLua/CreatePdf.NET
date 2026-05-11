@@ -66,22 +66,23 @@ public class OcrServiceTests
     }
 
     [Fact]
-    public void TryDeleteFile_ExistingFile_DeletesSuccessfully()
+    public void TryDeleteDirectory_ExistingDirectoryWithContents_DeletesRecursively()
     {
-        var tempFile = Path.GetTempFileName();
-        File.Exists(tempFile).Should().BeTrue();
+        var tempDir = Directory.CreateTempSubdirectory("createpdf-ocr-test-");
+        File.WriteAllText(Path.Combine(tempDir.FullName, "leftover.txt"), "x");
 
-        OcrService.TryDeleteFile(tempFile);
+        OcrService.TryDeleteDirectory(tempDir.FullName);
 
-        File.Exists(tempFile).Should().BeFalse();
+        Directory.Exists(tempDir.FullName).Should().BeFalse();
     }
 
     [Fact]
-    public void TryDeleteFile_NonExistentFile_DoesNotThrow()
+    public void TryDeleteDirectory_NonExistentDirectory_DoesNotThrow()
     {
-        var nonExistentFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+        var nonExistent = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
 
-        var act = () => OcrService.TryDeleteFile(nonExistentFile);
+        var act = () => OcrService.TryDeleteDirectory(nonExistent);
+
         act.Should().NotThrow();
     }
 }

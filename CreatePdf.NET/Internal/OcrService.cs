@@ -2,6 +2,8 @@ namespace CreatePdf.NET.Internal;
 
 internal sealed class OcrService
 {
+    private const string TempDirPrefix = "createpdf-ocr-";
+
     private readonly IOcrProvider _provider;
 
     public OcrService() : this(new TesseractOcrProvider())
@@ -16,49 +18,53 @@ internal sealed class OcrService
     public async Task<string> ProcessPdfAsync(string pdfPath, OcrOptions options,
         CancellationToken cancellationToken = default)
     {
-        var tempDir = Path.GetTempPath();
-        var pdfName = Path.GetFileNameWithoutExtension(pdfPath);
-        var pngPath = Path.Combine(tempDir, $"{pdfName}_{Guid.NewGuid():N}.png");
-        var txtPath = Path.Combine(tempDir, $"{pdfName}_{Guid.NewGuid():N}.txt");
-
+        var workDir = Directory.CreateTempSubdirectory(TempDirPrefix);
         try
         {
-            await _provider.RasterizePdfToPngAsync(pdfPath, pngPath, options, cancellationToken).ConfigureAwait(false);
-            return await _provider.ExtractTextFromImageAsync(pngPath, txtPath, options, cancellationToken)
-                .ConfigureAwait(false);
+            return await OcrAsync(pdfPath, workDir.FullName, options, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
-            TryDeleteFile(pngPath);
-            TryDeleteFile(txtPath);
+            TryDeleteDirectory(workDir.FullName);
         }
     }
 
     public async Task<string> ProcessPdfStreamAsync(Stream pdfStream, OcrOptions options,
         CancellationToken cancellationToken = default)
     {
-        var tempDir = Path.GetTempPath();
-        var pdfFileName = Path.ChangeExtension(Path.GetRandomFileName(), ".pdf");
-        var pdfPath = Path.Combine(tempDir, pdfFileName);
-
+        var workDir = Directory.CreateTempSubdirectory(TempDirPrefix);
         try
         {
-            await using (var fileStream = new FileStream(pdfPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+            var pdfPath = Path.Combine(workDir.FullName, "input.pdf");
+            await using (var fileStream =
+                         new FileStream(pdfPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
             {
                 await pdfStream.CopyToAsync(fileStream, cancellationToken).ConfigureAwait(false);
             }
 
-            return await ProcessPdfAsync(pdfPath, options, cancellationToken).ConfigureAwait(false);
+            return await OcrAsync(pdfPath, workDir.FullName, options, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
-            TryDeleteFile(pdfPath);
+            TryDeleteDirectory(workDir.FullName);
         }
     }
 
-    internal static void TryDeleteFile(string path)
+    private async Task<string> OcrAsync(string pdfPath, string workDir, OcrOptions options,
+        CancellationToken cancellationToken)
     {
-        if (File.Exists(path))
-            File.Delete(path);
+        var pdfName = Path.GetFileNameWithoutExtension(pdfPath);
+        var pngPath = Path.Combine(workDir, $"{pdfName}.png");
+        var txtPath = Path.Combine(workDir, $"{pdfName}.txt");
+
+        await _provider.RasterizePdfToPngAsync(pdfPath, pngPath, options, cancellationToken).ConfigureAwait(false);
+        return await _provider.ExtractTextFromImageAsync(pngPath, txtPath, options, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    internal static void TryDeleteDirectory(string path)
+    {
+        if (Directory.Exists(path))
+            Directory.Delete(path, recursive: true);
     }
 }

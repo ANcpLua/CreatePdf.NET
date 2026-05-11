@@ -17,14 +17,16 @@ public class RuntimeSystemEnvironmentTests
     [Fact]
     public void FileExists_DelegatesToFileSystem()
     {
-        var temp = Path.GetTempFileName();
+        var tempDir = Directory.CreateTempSubdirectory("createpdf-runtime-test-");
+        var temp = Path.Combine(tempDir.FullName, "probe.txt");
+        File.WriteAllText(temp, string.Empty);
         try
         {
             RuntimeSystemEnvironment.Instance.FileExists(temp).Should().BeTrue();
         }
         finally
         {
-            File.Delete(temp);
+            tempDir.Delete(recursive: true);
         }
 
         RuntimeSystemEnvironment.Instance.FileExists(temp).Should().BeFalse();

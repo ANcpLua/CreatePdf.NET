@@ -10,7 +10,9 @@ internal sealed class ProcessRunner : IProcessRunner
     {
         ArgumentNullException.ThrowIfNull(startInfo);
 
-        using var process = Process.Start(startInfo)!;
+        using var process = Process.Start(startInfo)
+            ?? throw new InvalidOperationException(
+                $"Process.Start returned null for '{startInfo.FileName}' — no new process was created.");
         await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
     }
 }

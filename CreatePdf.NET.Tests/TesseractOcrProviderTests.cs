@@ -11,7 +11,7 @@ public class TesseractOcrProviderTests
     [Fact]
     public async Task ExtractTextFromImageAsync_WhenOutputIsMissing_ThrowsFileNotFound()
     {
-        var processRunner = new FakeProcessRunner();
+        var processRunner = new FakeProcessRunner { NextResult = new ProcessResult(1, "", "") };
         var environment = new FakeSystemEnvironment { FileExistsImpl = _ => false };
         var engine = new TesseractOcrProvider(environment, processRunner);
 
@@ -21,12 +21,34 @@ public class TesseractOcrProviderTests
             new OcrOptions { TesseractPath = "/bin/echo" });
 
         await act.Should().ThrowAsync<FileNotFoundException>()
-            .WithMessage("OCR output file not found. Tesseract execution failed*")
+            .WithMessage("OCR output file not found (Tesseract exited with code 1)*")
             .ConfigureAwait(true);
 
         processRunner.StartInfos.Should().HaveCount(1);
         processRunner.StartInfos[0].FileName.Should().Be("/bin/echo");
         processRunner.StartInfos[0].Arguments.Should().Contain("input.png");
+    }
+
+    [Fact]
+    public async Task ExtractTextFromImageAsync_WhenOutputIsMissing_IncludesStderrInExceptionMessage()
+    {
+        const string tesseractStderr = "Error opening data file /usr/share/tessdata/eng.traineddata";
+        var processRunner = new FakeProcessRunner
+        {
+            NextResult = new ProcessResult(ExitCode: 1, StandardOutput: "", StandardError: tesseractStderr)
+        };
+        var environment = new FakeSystemEnvironment { FileExistsImpl = _ => false };
+        var engine = new TesseractOcrProvider(environment, processRunner);
+
+        var act = () => engine.ExtractTextFromImageAsync(
+            "input.png",
+            Path.Combine(Path.GetTempPath(), "missing-output.txt"),
+            new OcrOptions { TesseractPath = "/bin/echo" });
+
+        await act.Should().ThrowAsync<FileNotFoundException>()
+            .Where(e => e.Message.Contains(tesseractStderr, StringComparison.Ordinal)
+                        && e.Message.Contains("exited with code 1", StringComparison.Ordinal))
+            .ConfigureAwait(true);
     }
 
     [Theory]
@@ -207,10 +229,12 @@ public class TesseractOcrProviderTests
     {
         public List<ProcessStartInfo> StartInfos { get; } = [];
 
-        public Task RunAsync(ProcessStartInfo startInfo, CancellationToken cancellationToken)
+        public ProcessResult NextResult { get; set; } = new(ExitCode: 0, StandardOutput: "", StandardError: "");
+
+        public Task<ProcessResult> RunAsync(ProcessStartInfo startInfo, CancellationToken cancellationToken)
         {
             StartInfos.Add(startInfo);
-            return Task.CompletedTask;
+            return Task.FromResult(NextResult);
         }
     }
 }

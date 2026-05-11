@@ -82,6 +82,7 @@ jobs:
         run: dotnet pack CreatePdf.NET/CreatePdf.NET.csproj --configuration Release --no-build --output ./nupkg -p:GeneratePackageOnBuild=false
 
       - name: Authenticate with NuGet
+        id: nuget-auth
         uses: NuGet/login@v1
         if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
         with:
@@ -89,7 +90,10 @@ jobs:
 
       - name: Publish packages to NuGet.org
         if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+        env:
+          NUGET_API_KEY: ${{ steps.nuget-auth.outputs.NUGET_API_KEY }}
         run: |
           dotnet nuget push ./nupkg/*.nupkg \
             --source https://api.nuget.org/v3/index.json \
+            --api-key "$NUGET_API_KEY" \
             --skip-duplicate

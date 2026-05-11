@@ -162,6 +162,10 @@ public class DocumentTests
     [Fact]
     public async Task FluentApi_ChainsMultipleOperations()
     {
+        // Unique filename so parallel test-host processes (one per target framework)
+        // do not race on the same output file.
+        var filename = $"fluent-test-{Guid.NewGuid():N}";
+
         Func<Task> act = () => Pdf.Create()
             .AddText("Title", Dye.Black, TextSize.Large, TextAlignment.Center)
             .AddLine()
@@ -169,7 +173,7 @@ public class DocumentTests
             .AddLines(2)
             .AddPixelText("Pixel text", Dye.Red)
             .AddLine()
-            .SaveAsync("fluent-test");
+            .SaveAsync(filename);
 
         await act.Should().NotThrowAsync().ConfigureAwait(true);
     }

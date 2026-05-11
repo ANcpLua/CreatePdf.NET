@@ -24,6 +24,7 @@ jobs:
 
       - name: Optimize package icon
         run: |
+          python3 -m pip install --quiet --disable-pip-version-check Pillow
           python3 << 'EOF'
           from PIL import Image
           import os

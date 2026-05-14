@@ -75,12 +75,13 @@ internal static partial class FileOperations
     [ExcludeFromCodeCoverage(Justification = "Interacts with OS shell")]
     public static void ShowDirectory(string path)
     {
+        var environment = RuntimeSystemEnvironment.Instance;
         try
         {
             var (fileName, arguments) = true switch
             {
-                _ when OperatingSystem.IsWindows() => ("explorer", $"/select,\"{path}\""),
-                _ when OperatingSystem.IsMacOS() => ("open", $"-R \"{path}\""),
+                _ when environment.IsWindows => ("explorer", $"/select,\"{path}\""),
+                _ when environment.IsMacOS => ("open", $"-R \"{path}\""),
                 _ => ("xdg-open", $"\"{Path.GetDirectoryName(path) ?? path}\"")
             };
 

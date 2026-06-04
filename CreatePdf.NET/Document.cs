@@ -202,6 +202,29 @@ public sealed class Document
     }
 
     /// <summary>
+    ///     Renders the document to an in-memory PDF and returns its bytes, without touching the disk.
+    /// </summary>
+    /// <returns>The complete PDF document as a byte array.</returns>
+    /// <example>
+    ///     <code>
+    /// byte[] pdf = await Pdf.Create(Dye.White)
+    ///     .AddText("Hello World")
+    ///     .ToBytesAsync();
+    /// </code>
+    /// </example>
+    public async Task<byte[]> ToBytesAsync()
+    {
+        await using var stream = new MemoryStream();
+        await using var writer = new PdfWriter(stream, _background);
+
+        foreach (var content in _contents)
+            content.Render(writer);
+
+        await writer.FinalizeAsync();
+        return stream.ToArray();
+    }
+
+    /// <summary>
     ///     Saves the document to a PDF file.
     /// </summary>
     /// <param name="filename">Optional filename. If not provided, generates a timestamped name.</param>
@@ -209,14 +232,7 @@ public sealed class Document
     public async Task<string> SaveAsync(string? filename = null)
     {
         var path = FileOperations.GetOutputPath(filename);
-
-        await using var stream = File.Create(path);
-        await using var writer = new PdfWriter(stream, _background);
-
-        foreach (var content in _contents)
-            content.Render(writer);
-
-        await writer.FinalizeAsync();
+        await File.WriteAllBytesAsync(path, await ToBytesAsync());
         return path;
     }
 

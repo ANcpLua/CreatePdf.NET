@@ -17,14 +17,14 @@
     <!-- Test Framework -->
     <PackageReference Include="xunit" Version="2.9.3"/>
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5"/>
-    <PackageReference Include="xunit.analyzers" Version="1.25.0">
+    <PackageReference Include="xunit.analyzers" Version="1.27.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>build; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
 
     <!-- Test Utilities -->
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1"/>
-    <PackageReference Include="AwesomeAssertions" Version="9.3.0"/>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.6.0"/>
+    <PackageReference Include="AwesomeAssertions" Version="9.4.0"/>
     <PackageReference Include="NSubstitute" Version="5.3.0"/>
     <PackageReference Include="coverlet.collector" Version="6.0.4"/>
     <PackageReference Update="ErrorProne.NET.CoreAnalyzers" Version="0.1.2">
